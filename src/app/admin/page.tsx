@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import { useState,useEffect,useCallback } from 'react';
 import {
  ArrowLeft,ArrowRight,ChevronDown,ChevronUp,Copy,Download,Edit3,
  Lock,LogOut,Pause,Play,Plus,Printer,RefreshCw,Save,ShieldCheck,
  Sparkles,Trash2,Users,X,Check,Trophy,RotateCw
 } from 'lucide-react';
+import { HuntMark } from '@/components/HuntArtwork';
 
 type Stage={
  id:string;position:number;title:string;suit:'♠'|'♥'|'♦'|'♣'|'★';
@@ -119,29 +119,29 @@ export default function AdminPage(){
  if(loading)return <div className="admin-loading">✦ SHUFFLING THE DECK…</div>;
  if(!authorized)return <div className="admin-login-screen">
   <div className="admin-login-art"><a href="/" className="back-home"><ArrowLeft size={17}/> Back to the hunt</a>
-   <span className="admin-giant">♠</span><h1>BEHIND THE<br/>CURTAIN<span>.</span></h1>
+   <span className="admin-giant" aria-hidden>♠︎</span><HuntMark/>
+   <h1>BEHIND THE<br/>CURTAIN<span>.</span></h1>
    <p>Organizer access only. The Joker trusts you with the deck.</p>
-   <Image src="/debate-logo.png" alt="Debate Club logo" width={96} height={96}/>
   </div>
   <div className="admin-login-form">
-   <div className="admin-form-card"><span className="eyebrow dark-kicker"><Lock size={16}/> ORGANIZER PORTAL</span>
-    <h2>WELCOME, DEALER.</h2><p>Sign in with an authorized Supabase organizer account.</p>
-    <form onSubmit={login} className="stack-form">
-     <label>EMAIL <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="organizer@example.com"/></label>
-     <label>PASSWORD <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Your secure password"/></label>
-     <button className="btn btn-blue full" disabled={busy}>Unlock the deck <ArrowRight size={18}/></button>
+   <div className="admin-form-card"><p className="hunt-label">ORGANIZER PORTAL</p>
+    <h2>WELCOME, DEALER.</h2><p>Sign in with your organizer account.</p>
+    <form onSubmit={login} className="hunt-form">
+     <label>ORGANIZER EMAIL <input type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="organizer@example.com"/></label>
+     <label>PASSWORD <input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Your password"/></label>
+     <button className="hunt-button hunt-blue" disabled={busy}>{busy?'SIGNING IN…':'OPEN THE DASHBOARD'} <ArrowRight size={18} aria-hidden/></button>
     </form>
-    {notice&&<p className="error-note">{notice}</p>}
+    {notice&&<p className="hunt-error" role="alert">{notice}</p>}
    </div>
   </div>
  </div>;
  return <div className="admin-shell">
-  <header className="admin-header"><a href="/" className="admin-brand">✦ JOKER&apos;S HUNT <small>CONTROL ROOM</small></a>
-   <div className="admin-nav"><button onClick={()=>void refresh()}><RefreshCw size={17}/> Refresh</button>
-    <button onClick={()=>void logout()}><LogOut size={17}/> Log out</button></div></header>
+  <header className="admin-header"><a href="/" className="admin-brand"><HuntMark/><span>JOKER&apos;S <b>HUNT</b></span><small>CONTROL ROOM</small></a>
+   <div className="admin-nav"><button onClick={()=>void refresh()} aria-label="Refresh dashboard"><RefreshCw size={17} aria-hidden/><span>Refresh</span></button>
+    <button onClick={()=>void logout()} aria-label="Log out"><LogOut size={17} aria-hidden/><span>Log out</span></button></div></header>
   <div className="admin-wrap">
    <div className="admin-top"><div><span className="eyebrow dark-kicker">GUVOICES × GERMAN FESTIVAL</span>
-    <h1>THE DEALER&apos;S DESK<span> ★</span></h1>
+    <h1>THE DEALER&apos;S <em>DESK.</em></h1>
     <p>Build the hunt. Protect the players. Keep the Joker on his toes.</p></div>
     <button className={`status-button ${paused?'paused':''}`} onClick={()=>void teamAction(paused?'resume':'pause')}>
      {paused?<Play size={18}/>:<Pause size={18}/>} {paused?'RESUME GAME':'PAUSE GAME'}</button></div>
@@ -152,9 +152,9 @@ export default function AdminPage(){
     <div><span>GAME STATUS</span><b className="status-text">{paused?'PAUSED':'LIVE'}</b><small>organizer controlled</small></div>
    </div>
    <div className="admin-tabs">
-    <button className={tab==='stages'?'selected':''} onClick={()=>setTab('stages')}><Edit3 size={17}/> Stage editor</button>
-    <button className={tab==='teams'?'selected':''} onClick={()=>setTab('teams')}><Users size={17}/> Teams & recovery</button>
-    <button className={tab==='print'?'selected':''} onClick={()=>setTab('print')}><Printer size={17}/> Print checkpoints</button>
+    <button className={tab==='stages'?'selected':''} aria-pressed={tab==='stages'} onClick={()=>setTab('stages')}><Edit3 size={17} aria-hidden/> Stage editor</button>
+    <button className={tab==='teams'?'selected':''} aria-pressed={tab==='teams'} onClick={()=>setTab('teams')}><Users size={17} aria-hidden/> Teams & recovery</button>
+    <button className={tab==='print'?'selected':''} aria-pressed={tab==='print'} onClick={()=>setTab('print')}><Printer size={17} aria-hidden/> Print checkpoints</button>
    </div>
    {notice&&<div className="admin-notice"><span>{notice}</span><button onClick={()=>setNotice('')}><X size={16}/></button></div>}
    {tab==='stages'&&<div className="admin-body">

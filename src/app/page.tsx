@@ -1,13 +1,13 @@
 'use client';
 
-import Image from 'next/image';
 import { useState,useEffect,useCallback,useMemo } from 'react';
 import {
- ArrowRight,ArrowLeft,ArrowUpRight,Check,CheckCircle2,Clock3,Copy,
- Crown,Eye,Flag,Heart,HelpCircle,LockKeyhole,Menu,RefreshCw,ScanLine,
- ShieldCheck,Sparkles,Star,Trophy,Users,Volume2,X,Play,LogOut,KeyRound
+ ArrowRight,ArrowUpRight,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Copy,Eye,Flag,
+ HelpCircle,LockKeyhole,LogOut,Minus,Plus,RefreshCw,ScanLine,ShieldCheck,Sparkles,Trophy,X
 } from 'lucide-react';
 import QrScanner from '@/components/QrScanner';
+import { JokerArtwork } from '@/components/HuntArtwork';
+import { HuntDialog,HuntHeader,HuntStory,HuntTabs,suits,type HuntOverlay,type HuntView } from '@/components/HuntIntro';
 
 type Stage={
  id:string;position:number;title:string;suit:string;clue:string;locationLabel:string;
@@ -21,7 +21,6 @@ type Game={
  stage:Stage|null
 };
 type Rank={rank:number;name:string;stages:number;finished:boolean;elapsedSeconds:number|null;total:number};
-const suits=['♠','♥','♦','♣','★'];
 const pads=(n:number)=>String(n).padStart(2,'0');
 function duration(sec:number) {
  const t=Math.max(0,Math.floor(sec));return `${pads(Math.floor(t/3600))}:${pads(Math.floor(t/60)%60)}:${pads(t%60)}`;
@@ -32,25 +31,18 @@ async function send(url:string,body:unknown,method='POST'){
  if(!r.ok)throw new Error(data.error||'Something went wrong. Please try again.');
  return data;
 }
-function SymbolSpark({style}:{style?:React.CSSProperties}) {
- return <span className="hero-spark" style={style} aria-hidden>✦</span>;
-}
-function LogoStrip(){return <div className="logo-strip">
- <div className="logo-pair"><Image src="/debate-logo.png" alt="Debate Club logo" width={48} height={48}/>
- <Image src="/german-logo.png" alt="German Club logo" width={48} height={48}/></div>
- <span>GUvoices <b>×</b> German Festival</span>
- </div>}
-function Card({suit='★',index=0,complete=false,active=false,small=false}:{
- suit?:string;index?:number;complete?:boolean;active?:boolean;small?:boolean
+function Card({suit,index,complete,active}:{
+ suit:string;index:number;complete:boolean;active:boolean
 }){
- return <div className={`collectible ${complete?'collected':''} ${active?'active':''} ${small?'small-card':''}`}>
+ const mark=suit.endsWith('\uFE0E')?suit:suit+'\uFE0E';
+ return <div className={`collectible ${complete?'collected':''} ${active?'active':''}`} aria-hidden>
   <div className="collectible-inner">
    <div className="card-face card-back"><span className="corner-small">J</span>
     <span className="back-emblem">✦<br/><span>JOKER</span></span><span className="corner-small bottom">J</span>
    </div>
-   <div className="card-face card-front"><span className="card-rank">{index+1}<small>{suit}</small></span>
-    <span className="card-suit">{suit}</span>
-    <span className="card-rank lower">{index+1}<small>{suit}</small></span></div>
+   <div className="card-face card-front"><span className="card-rank">{index+1}<small>{mark}</small></span>
+    <span className="card-suit">{mark}</span>
+    <span className="card-rank lower">{index+1}<small>{mark}</small></span></div>
   </div>
  </div>;
 }
@@ -60,42 +52,23 @@ function Confetti(){return <div className="confetti-field" aria-hidden>
   '--fall':`${3+(i%5)*0.4}s`,'--rotate':`${i*61}deg`
  } as React.CSSProperties}/>)}
  </div>}
-function Navbar({view,setView,hasTeam}:{view:string;setView:(v:string)=>void;hasTeam:boolean}){
- const [mobile,setMobile]=useState(false);
- const nav=(name:string,label:string)=><button className={view===name?'active':''}
- onClick={()=>{setView(name);setMobile(false);}}>{label}</button>;
- return <header className="site-nav">
-  <div className="nav-inner">
-   <button className="brand" onClick={()=>setView('home')} aria-label="The Joker's Hunt home">
-    <span className="brand-symbol">✦</span><span>JOKER&apos;S <b>HUNT</b></span>
-   </button>
-   <div className={`nav-links ${mobile?'open':''}`}>
-    {nav('home','The story')}{nav('leaderboard','Leaderboard')}
-    {hasTeam&&nav('game','My cards')}
-    <a href="/admin" className="nav-admin">Organizer login <ArrowUpRight size={14}/></a>
-   </div>
-   <div className="nav-actions">
-    {hasTeam?<button className="nav-cta" onClick={()=>setView('game')}>Return to hunt <ArrowRight size={16}/></button>
-    :<button className="nav-cta" onClick={()=>setView('register')}>Join the hunt <ArrowRight size={16}/></button>}
-    <button className="mobile-menu" onClick={()=>setMobile(!mobile)} aria-label="Menu">{mobile?<X/>:<Menu/>}</button>
-   </div>
-  </div>
- </header>;
-}
 export default function Home(){
- const [view,setView]=useState('home'),[game,setGame]=useState<Game|null>(null),
+ const [view,setView]=useState<HuntView>('home'),[game,setGame]=useState<Game|null>(null),
  [loading,setLoading]=useState(true),[serverError,setServerError]=useState(''),
  [publicStageCount,setPublicStageCount]=useState(5),
  [ranks,setRanks]=useState<Rank[]>([]),[registerMode,setRegisterMode]=useState<'new'|'rejoin'>('new'),
- [name,setName]=useState(''),[leader,setLeader]=useState(''),[size,setSize]=useState('3'),
+ [name,setName]=useState(''),[leader,setLeader]=useState(''),[size,setSize]=useState(3),
  [accessInput,setAccessInput]=useState(''),[newCode,setNewCode]=useState(''),
  [working,setWorking]=useState(false),[notice,setNotice]=useState(''),
  [scanning,setScanning]=useState(false),[codeInput,setCodeInput]=useState(''),
  [scanned,setScanned]=useState(''),[answer,setAnswer]=useState(''),
- [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now());
+ [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now()),
+ [overlay,setOverlay]=useState<HuntOverlay|null>(null),[formError,setFormError]=useState(''),
+ [copied,setCopied]=useState(false),[rankPage,setRankPage]=useState(0);
  const refresh=useCallback(async()=>{
-  const res=await fetch('/api/state',{cache:'no-store'});
-  if(res.status===401){setGame(null);setLoading(false);return;}
+  const res=await fetch('/api/state',{cache:'no-store'}).catch(()=>null);
+  if(!res){setServerError('Could not connect to the game.');setLoading(false);return;}
+  if(res.status===401){setGame(null);setServerError('');setLoading(false);return;}
   const data=await res.json().catch(()=>({error:'Could not read the server response.'}));
   if(!res.ok){setServerError(data.error||'Backend unavailable.');setLoading(false);return;}
   setGame(data);setServerError('');setLoading(false);
@@ -105,7 +78,12 @@ export default function Home(){
    if(typeof d.totalStages==='number'&&d.totalStages>0)setPublicStageCount(d.totalStages);
   }).catch(()=>{});
  },[refresh]);
- useEffect(()=>{const t=setInterval(()=>setClock(Date.now()),1000);return()=>clearInterval(t);},[]);
+ useEffect(()=>{
+  if(view!=='game'||!game?.team.startedAt||game.team.finishedAt||game.paused)return;
+  setClock(Date.now());
+  const timer=setInterval(()=>setClock(Date.now()),1000);
+  return()=>clearInterval(timer);
+ },[view,game?.team.startedAt,game?.team.finishedAt,game?.paused]);
  // Keep the pause state and organizer recovery decisions current on open game screens.
  useEffect(()=>{
   if(!game||view!=='game')return;
@@ -132,15 +110,28 @@ export default function Home(){
  },[]);
  useEffect(()=>{setHint('');setAnswer('');setCodeInput('');},[game?.stage?.id]);
  async function register(){
-  setNotice('');setWorking(true);
+  setFormError('');
+  if(name.trim().length<2){
+   setFormError(name.trim()?'Use at least two characters for your team name.':'Give your team a name first.');
+   return;
+  }
+  if(registerMode==='new'&&leader.trim().length<2){
+   setFormError(leader.trim()?'Use at least two characters for the team leader.':'Add the team leader’s name.');
+   return;
+  }
+  if(registerMode==='rejoin'&&!accessInput.trim()){
+   setFormError('Enter your rejoin code.');
+   return;
+  }
+  setWorking(true);
   try{
    const data=await send(registerMode==='new'?'/api/team/register':'/api/team/rejoin',
-    registerMode==='new'?{teamName:name,leaderName:leader,size:Number(size)}:
+    registerMode==='new'?{teamName:name,leaderName:leader,size}:
     {teamName:name,accessCode:accessInput});
    await refresh();
    if(data.accessCode)setNewCode(data.accessCode);
-   else {setView('game');setNotice('Your team is back in the game!');}
-  }catch(e){setNotice((e as Error).message);}
+   else {setAccessInput('');setView('game');setNotice('Your team is back in the game!');}
+  }catch(e){setFormError((e as Error).message);}
   finally{setWorking(false);}
  }
  async function verify(value:string,method:'qr'|'backup'){
@@ -179,9 +170,30 @@ export default function Home(){
   finally{setWorking(false);}
  }
  async function logout(){
-  try{await send('/api/team/logout',{});setGame(null);setNewCode('');setView('home');}
+  try{await send('/api/team/logout',{});setGame(null);setNewCode('');setNotice('');setView('home');}
   catch(e){setNotice((e as Error).message);}
  }
+ useEffect(()=>{
+  if(!copied)return;
+  const timer=setTimeout(()=>setCopied(false),1600);
+  return()=>clearTimeout(timer);
+ },[copied]);
+ async function copyCode(){
+  try{await navigator.clipboard.writeText(newCode);setCopied(true);setFormError('');}
+  catch{setFormError('Could not copy automatically. Select and copy the code above.');}
+ }
+ async function resetRegistration(){
+  setWorking(true);setFormError('');setNotice('');
+  try{
+   await send('/api/team/logout',{});
+   setGame(null);setNewCode('');setName('');setLeader('');setAccessInput('');
+   setSize(3);setRegisterMode('new');setCopied(false);
+  }catch(err){setFormError((err as Error).message);}
+  finally{setWorking(false);}
+ }
+ const joinHunt=()=>setView(game&&!newCode?'game':'register');
+ const rankPages=Math.max(1,Math.ceil(ranks.length/5));
+ const currentRankPage=Math.min(rankPage,rankPages-1);
  const elapsed=game?.team.startedAt?duration(
   ((game.paused&&game.pausedAt?new Date(game.pausedAt).getTime():clock)-
   new Date(game.team.startedAt).getTime())/1000
@@ -195,132 +207,57 @@ export default function Home(){
   const active=game?.stage?.position===i+1;
   return {index:i,done:!!collected,active,suit:collected?.suit||(active?game?.stage?.suit:suits[i%suits.length])||'★'};
  }),[game]);
- return <div className="site">
-  <Navbar view={view} setView={setView} hasTeam={!!game}/>
-  <main>
-  {view==='home'&&<>
-   <section className="hero">
-    <div className="grid-overlay" aria-hidden/>
-    <div className="hero-content layout-wide">
-     <div className="hero-copy">
-      <span className="eyebrow hero-kicker"><Sparkles size={16}/> GUVOICES × GERMAN FESTIVAL · 08 DEC 2026</span>
-      <span className="hero-mini">AN ADVENTURE FROM THE DEBATE CLUB</span>
-      <h1>THE<br/><em>JOKER&apos;S</em><br/>HUNT<span className="period">.</span></h1>
-      <p className="hero-tagline">Every card holds a clue.<br/><b>Can you outsmart the Joker?</b></p>
-      <div className="hero-buttons">
-       <button className="btn btn-yellow" onClick={()=>setView(game?'game':'register')}>
-        {game?'Continue my hunt':'Start the hunt'} <ArrowUpRight size={21}/>
+ return <div className="hunt-app">
+  <HuntHeader onStory={() => setView('home')} onOrganizer={() => setOverlay('organizer')}/>
+  <main key={view} className={'hunt-main hunt-main-' + view}>
+  {view==='home'&&<HuntStory joined={!!game && !newCode} count={publicStageCount} onJoin={joinHunt} onOverlay={setOverlay}/>}
+
+  {view==='register'&&<section className="hunt-join hunt-grid">
+   <div className="join-frame">
+    <div className="join-heading">
+     <p className="hunt-label"><span aria-hidden>♠︎</span> PLAY YOUR HAND</p>
+     <h1>EVERY GREAT HUNT<br/>STARTS WITH A <em>TEAM.</em></h1>
+    </div>
+    <div className="join-card">
+     {newCode ? <div className="join-success">
+      <p className="hunt-label"><span aria-hidden>★︎</span> YOU&apos;RE IN THE GAME</p>
+      <h2>{game?.team.name || name.trim()}</h2>
+      <p>{size} players. Save this rejoin code somewhere safe. You&apos;ll need it to get back in.</p>
+      <div className="join-code"><strong>{newCode}</strong><button type="button" onClick={() => void copyCode()}>
+       {copied ? <Check size={16} aria-hidden/> : <Copy size={16} aria-hidden/>}{copied ? 'COPIED' : 'COPY'}
+      </button></div>
+      {formError && <p className="hunt-error" role="alert">{formError}</p>}
+      <button className="hunt-button hunt-yellow" onClick={() => { setNewCode(''); setView('game'); }}>
+       CONTINUE TO MY HUNT <ArrowRight size={18} aria-hidden/>
+      </button>
+      <button className="hunt-button hunt-outline" onClick={() => setView('leaderboard')}>SEE THE LEADERBOARD <Trophy size={17} aria-hidden/></button>
+      <button className="join-reset" disabled={working} onClick={() => void resetRegistration()}>Start over with a new team</button>
+     </div> : <>
+      <h2>ASSEMBLE YOUR CREW.</h2>
+      <div className="join-segment" role="group" aria-label="Team access">
+       <button aria-pressed={registerMode==='new'} onClick={() => { setRegisterMode('new'); setFormError(''); }}>New team</button>
+       <button aria-pressed={registerMode==='rejoin'} onClick={() => { setRegisterMode('rejoin'); setFormError(''); }}>Rejoin a team</button>
+      </div>
+      <form className="hunt-form" noValidate onSubmit={event => { event.preventDefault(); void register(); }}>
+       <label>TEAM NAME<input value={name} onChange={event => { setName(event.target.value); setFormError(''); }} placeholder="The Wild Cards" maxLength={45}/></label>
+       {registerMode==='new' ? <>
+        <label>TEAM LEADER&apos;S NAME<input value={leader} onChange={event => { setLeader(event.target.value); setFormError(''); }} placeholder="Your name" maxLength={70} autoComplete="name"/></label>
+        <div className="join-player-row">
+         <span id="join-player-label">NUMBER OF PLAYERS</span>
+         <div className="join-stepper" role="group" aria-labelledby="join-player-label">
+          <button type="button" aria-label="Remove one player" disabled={size<=2} onClick={() => setSize(size-1)}><Minus size={18} aria-hidden/></button>
+          <output aria-live="polite" aria-label="Players">{size}</output>
+          <button type="button" aria-label="Add one player" disabled={size>=10} onClick={() => setSize(size+1)}><Plus size={18} aria-hidden/></button>
+         </div>
+        </div>
+       </> : <label>REJOIN CODE<input className="join-rejoin-code" value={accessInput} onChange={event => { setAccessInput(event.target.value.toUpperCase()); setFormError(''); }}
+        placeholder="JH-XXXX-XXXX-XXXX" autoCapitalize="characters" autoComplete="off" spellCheck={false}/></label>}
+       <button className="hunt-button hunt-blue" disabled={working} type="submit">
+        {working ? 'ONE MOMENT…' : registerMode==='new' ? 'CREATE MY TEAM' : 'REJOIN MY TEAM'} <ArrowRight size={18} aria-hidden/>
        </button>
-       <button className="btn btn-ghost" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>
-        How to play <ArrowRight size={20}/>
-       </button>
-      </div>
-      <div className="event-meta"><span>✦ GUtech · Oman</span><span>♣ {publicStageCount} mystery cards</span><span>♥ 1 final reveal</span></div>
-     </div>
-     <div className="hero-visual" aria-label="The Joker is your mysterious guide">
-      <div className="orbit orbit-one"/><div className="orbit orbit-two"/>
-      <SymbolSpark style={{top:'5%',right:'16%',fontSize:'72px',color:'#ffd52d'}}/>
-      <SymbolSpark style={{bottom:'15%',left:'3%',fontSize:'50px',color:'#fff9eb'}}/>
-      <div className="floating-suit suit-one">♠</div>
-      <div className="floating-suit suit-two">♥</div>
-      <div className="poster-card back-left"><span>J</span><b>♣</b></div>
-      <div className="poster-card back-right"><span>K</span><b>♦</b></div>
-      <div className="joker-main-card">
-       <div className="joker-corners"><b>J</b><span>✦</span></div>
-       <div className="joker-illustration"><Image src="/card-fan.webp" alt="Joker playing cards from the event poster" fill
-        sizes="(max-width: 700px) 240px, 340px" className="cardfan-image" priority/></div>
-       <div className="joker-signature">THE JOKER <span>☻</span></div>
-       <span className="joker-bottom">J ✦</span>
-      </div>
-      <div className="floating-note"><span>★</span> THE GAME IS ON</div>
-     </div>
-    </div>
-    <div className="hero-footer"><LogoStrip/><span>SCROLL TO EXPLORE ↓</span></div>
-   </section>
-   <div className="marquee" aria-hidden><div>♠ EVERY CARD HOLDS A CLUE ♥ EVERY CARD HOLDS A CLUE ♦ EVERY CARD HOLDS A CLUE ♣ EVERY CARD HOLDS A CLUE ★&nbsp;</div></div>
-   <section className="how-section" id="how">
-    <div className="layout-wide">
-     <div className="section-heading">
-      <span className="eyebrow dark-kicker">THE RULES OF THE GAME ✦</span>
-      <h2>{publicStageCount} CARDS.<br/><span>INFINITE SUSPENSE.</span></h2>
-      <p>Gather your team. Follow the Joker&apos;s trail across campus. Solve the mysteries, collect every card, and unlock the final reveal.</p>
-     </div>
-     <div className="how-grid">
-      {[
-       ['01','♣','FORM YOUR CREW','Register your team and save your secret rejoin code.'],
-       ['02','♠','FOLLOW THE CLUE','Find the campus checkpoint hidden behind each riddle.'],
-       ['03','♦','CRACK THE CODE','Scan a QR (or use a backup code), then solve the puzzle.'],
-       ['04','♥','COLLECT & CONQUER','Flip every mystery card to discover the final Joker secret.']
-      ].map(([num,symbol,title,desc])=><div className="how-card" key={num}>
-       <div className="how-top"><span>{num}</span><b>{symbol}</b></div>
-       <h3>{title}</h3><p>{desc}</p>
-      </div>)}
-     </div>
-    </div>
-   </section>
-   <section className="festival-feature">
-    <div className="festival-feature-inner layout-wide">
-     <div className="official-poster"><Image src="/poster.webp" alt="Official GUvoices × German Festival event poster"
-      width={340} height={481} sizes="(max-width: 700px) 270px, 340px"/></div>
-     <div className="festival-feature-copy">
-      <span className="eyebrow dark-kicker">THE EVENT BEHIND THE MYSTERY</span>
-      <h2>ONE FESTIVAL.<br/><span>COUNTLESS STORIES.</span></h2>
-      <p>The Joker&apos;s Hunt is part of GUvoices × German Festival at GUtech, hosted by the Debate Club. The festival&apos;s poster, colors and playing-card spirit shape every mystery in the game.</p>
-      <div className="festival-feature-logos"><Image src="/debate-logo.png" alt="Debate Club" width={67} height={67}/><span>×</span>
-       <Image src="/german-logo.png" alt="German Club" width={67} height={67}/></div>
-      <div className="festival-date">08 DECEMBER 2026 <span>✦</span> GUtech, OMAN</div>
-     </div>
-    </div>
-   </section>
-   <section className="teaser-section">
-    <div className="teaser-content layout-wide">
-     <div><span className="eyebrow">A HAND YOU WON&apos;T FORGET</span>
-      <h2>YOUR DESTINY<br/>IS IN THE <i>CARDS.</i></h2>
-      <p>{publicStageCount} checkpoints. {publicStageCount} collectible cards. One Joker who thinks you can&apos;t make it to the end.</p>
-      <button className="btn btn-blue" onClick={()=>setView(game?'game':'register')}>Deal me in <ArrowUpRight size={19}/></button>
-     </div>
-     <div className="teaser-hand">{suits.map((s,i)=><div className="teaser-card" key={i} style={{'--r':`${(i-2)*12}deg`,'--offset':`${Math.abs(i-2)*16}px`} as React.CSSProperties}>{s}<small>0{i+1}</small></div>)}</div>
-    </div>
-   </section>
-   <section className="closing-cta"><span>★</span><h2>THE JOKER IS WAITING.</h2><p>December 8, 2026 · GUtech, Oman</p>
-    <button className="btn btn-yellow" onClick={()=>setView(game?'game':'register')}>Accept the challenge <ArrowRight size={21}/></button>
-   </section>
-  </>}
-  {view==='register'&&<section className="inner-page register-page">
-   <div className="layout-wide registration-layout">
-    <div className="registration-story">
-     <span className="eyebrow">♠ PLAY YOUR HAND</span>
-     <h1>EVERY GREAT<br/>HUNT STARTS<br/><em>WITH A TEAM.</em></h1>
-     <p>Make an unforgettable memory. Bring your cleverest friends and keep your access code somewhere safe.</p>
-     <div className="story-quote"><span>“</span> A clever crew is better than a lucky card. <b>— The Joker</b></div>
-     <Image src="/debate-logo.png" width={80} height={80} alt="Debate Club" className="reg-logo"/>
-    </div>
-    <div className="form-panel">
-     <div className="form-head"><span>J ♥</span><b>THE JOKER&apos;S HUNT</b></div>
-     {newCode?<div className="code-success">
-      <CheckCircle2 size={44}/><h2>You&apos;re in, {name}!</h2>
-      <p>This is your <b>private rejoin code</b>. Save it before starting. Anyone with your team name and code can access your game.</p>
-      <div className="secret-code">{newCode}</div>
-      <button className="btn btn-outline full" onClick={()=>{void navigator.clipboard?.writeText(newCode);setNotice('Code copied!');}}><Copy size={18}/> Copy access code</button>
-      <button className="btn btn-blue full" onClick={()=>{setNewCode('');setView('game');setNotice('Let the hunt begin!');}}>I&apos;ve saved it — start playing <ArrowRight size={18}/></button>
-     </div>:<>
-      <h2>{registerMode==='new'?'ASSEMBLE YOUR CREW.':'WELCOME BACK.'}</h2>
-      <p className="muted">Ready to play your cards right?</p>
-      <div className="tab-buttons">
-       <button className={registerMode==='new'?'selected':''} onClick={()=>{setRegisterMode('new');setNotice('');}}>New team</button>
-       <button className={registerMode==='rejoin'?'selected':''} onClick={()=>{setRegisterMode('rejoin');setNotice('');}}>Rejoin a team</button>
-      </div>
-      <form onSubmit={e=>{e.preventDefault();void register();}} className="stack-form">
-       <label>TEAM NAME <input value={name} onChange={e=>setName(e.target.value)} placeholder="The Wild Cards" maxLength={45} required minLength={2}/></label>
-       {registerMode==='new'?<>
-        <label>TEAM LEADER&apos;S NAME <input value={leader} onChange={e=>setLeader(e.target.value)} placeholder="Your name" maxLength={70} required minLength={2}/></label>
-        <label>NUMBER OF PLAYERS <select value={size} onChange={e=>setSize(e.target.value)}>
-         {Array.from({length:9},(_,i)=><option key={i} value={i+2}>{i+2} players</option>)}
-        </select></label>
-       </>:<label>PRIVATE TEAM ACCESS CODE <input value={accessInput} onChange={e=>setAccessInput(e.target.value)} placeholder="JH-XXXX-XXXX-XXXX" required autoComplete="off"/></label>}
-       <button disabled={working} className="btn btn-blue full" type="submit">{working?'One moment…':registerMode==='new'?'Create my team':'Rejoin the hunt'} <ArrowRight size={19}/></button>
+       {formError ? <p className="hunt-error" role="alert">{formError}</p>
+        : <p className="join-privacy"><ShieldCheck size={16} aria-hidden/> Your leader&apos;s name and team access code are never shown on the leaderboard.</p>}
       </form>
-      <p className="form-note"><ShieldCheck size={16}/> Your leader&apos;s name and team access code are never shown on the leaderboard.</p>
      </>}
     </div>
    </div>
@@ -338,7 +275,7 @@ export default function Home(){
        <div className="final-reveal-card">
         <div className="final-face final-back"><span>J</span><strong>✦</strong><small>THE FINAL CARD</small></div>
         <div className="final-face final-front"><div className="final-art">
-         <Image src="/card-fan.webp" alt="Joker playing card art from the official event poster" fill sizes="220px"/>
+         <JokerArtwork/>
         </div><b>THE JOKER</b><small>♠ ♥ ♦ ♣ ★</small></div>
        </div>
       </div>
@@ -370,7 +307,7 @@ export default function Home(){
         <div className="progress-track"><div style={{width:`${fill}%`}}/></div>
         <div className="cards-row">{collection.map(c=><div key={c.index} className="card-slot">
          <Card index={c.index} suit={c.suit} complete={c.done} active={c.active}/>
-         <span>{c.done?'COLLECTED':c.active?'IN PLAY':'LOCKED'}</span>
+         <span>{c.done?'FOUND':c.active?'IN PLAY':'LOCKED'}</span>
         </div>)}</div>
        </div>
        {game.notStarted&&<div className="start-panel">
@@ -383,7 +320,7 @@ export default function Home(){
        {game.stage&&<div className="stage-panel">
         <div className="stage-head"><div className="stage-number">0{game.stage.position}</div>
          <div><span className="eyebrow">YOUR CURRENT MISSION</span><h2>{game.stage.title}</h2></div>
-         <div className="stage-suit">{game.stage.suit}</div></div>
+        <div className="stage-suit" aria-hidden>{game.stage.suit+'\uFE0E'}</div></div>
         <div className="clue-box"><span><Eye size={18}/> THE JOKER&apos;S CLUE</span><p>“{game.stage.clue}”</p></div>
         <div className="location-line"><Flag size={19}/><span>{game.stage.locationLabel}</span></div>
         {!game.stage.checkpointVerified?<div className="checkpoint-area">
@@ -428,31 +365,49 @@ export default function Home(){
     </div>}
    </div>
   </section>}
-  {view==='leaderboard'&&<section className="inner-page rankings-page">
-   <div className="layout-wide">
-    <div className="rankings-head"><div><span className="eyebrow">THE GAME IS AFOOT</span>
-     <h1>THE <em>LEADERBOARD.</em></h1><p>Who is playing the strongest hand? Team names only; private details stay private.</p></div>
-     <div className="trophy-illustration"><Trophy size={72}/><span>✦</span></div></div>
-    <div className="ranking-table"><div className="ranking-header">
-     <span>RANK</span><span>TEAM</span><span>CARDS</span><span>FINISH TIME</span></div>
-     {ranks.length===0?<div className="rank-empty"><Trophy size={36}/><h3>THE DECK IS STILL SHUFFLING.</h3><p>No teams to rank yet. Be the first to make your mark!</p></div>
-     :ranks.map(row=><div className={`ranking-row ${row.rank<=3?'top-three':''}`} key={row.rank}>
-      <div className="rank-badge">{row.rank===1?'🥇':row.rank===2?'🥈':row.rank===3?'🥉':`#${row.rank}`}</div>
-      <div className="ranking-team">{row.name}{row.finished&&<span className="won-label">FINISHED</span>}</div>
-      <div className="ranking-cards"><span>{'♠'.repeat(Math.min(row.stages,5))}</span><b>{row.stages}/{row.total}</b></div>
-      <div className="ranking-time">{row.elapsedSeconds!==null?duration(row.elapsedSeconds):'—'}</div>
-     </div>)}
+
+  {view==='leaderboard'&&<section className="hunt-rankings">
+   <div className="rank-frame">
+    <div className="rank-hero">
+     <div><p className="hunt-label">THE GAME IS AFOOT</p><h1>THE<br/><em>LEADER<br/>BOARD.</em></h1></div>
+     <div className="rank-trophy" aria-hidden><Trophy size={47}/><span>✦</span></div>
     </div>
-    <p className="leaderboard-footnote"><RefreshCw size={15}/> Rankings update every 15 seconds. Fastest full completion wins the tie between finished teams.</p>
+    <p className="rank-intro">Who is playing the strongest hand? Team names only; private details stay private.</p>
+    <div className="rank-card">
+     <table className="rank-table">
+      <caption className="sr-only">Team standings</caption>
+      <thead><tr><th scope="col">RANK</th><th scope="col">TEAM</th><th scope="col">CARDS</th><th scope="col">FINISH</th></tr></thead>
+      <tbody>
+       {ranks.length===0 ? <tr><td colSpan={4}><div className="hunt-rank-empty">
+        <Trophy size={26} aria-hidden/><h2>THE DECK IS STILL SHUFFLING.</h2>
+        <p>No teams to rank yet. Be the first to make your mark!</p>
+        <button className="hunt-button hunt-yellow" onClick={joinHunt}>{game && !newCode ? 'CONTINUE MY HUNT' : 'JOIN THE HUNT'} <ArrowRight size={17} aria-hidden/></button>
+       </div></td></tr>
+       : ranks.slice(currentRankPage*5,currentRankPage*5+5).map(row => <tr key={row.rank}>
+        <td><span className={'hunt-rank-badge' + (row.rank===1 ? ' rank-first' : '')}>{pads(row.rank)}</span></td>
+        <td className="hunt-rank-name"><span title={row.name}>{row.name}</span></td>
+        <td className="hunt-rank-number">{row.stages} / {row.total}</td>
+        <td className="hunt-rank-time">{row.elapsedSeconds!==null ? duration(row.elapsedSeconds) : row.finished ? 'Finished' : 'In play'}</td>
+       </tr>)}
+      </tbody>
+     </table>
+     {rankPages>1 && <div className="rank-pagination">
+      <button aria-label="Previous rankings page" disabled={currentRankPage===0} onClick={() => setRankPage(currentRankPage-1)}><ChevronLeft size={19} aria-hidden/></button>
+      <span aria-live="polite">{currentRankPage+1} / {rankPages}</span>
+      <button aria-label="Next rankings page" disabled={currentRankPage===rankPages-1} onClick={() => setRankPage(currentRankPage+1)}><ChevronRight size={19} aria-hidden/></button>
+     </div>}
+    </div>
+    <p className="rank-footnote"><RefreshCw size={15} aria-hidden/> Rankings update every 15 seconds. Fastest full completion wins the tie between finished teams.</p>
    </div>
   </section>}
   </main>
-  <footer className="site-footer"><div className="layout-wide footer-inner"><LogoStrip/>
-   <span>© 2026 GUvoices × German Festival · Organized by the Debate Club</span>
-   <span>♠ ♥ ♦ ♣ ★</span></div></footer>
+  <HuntTabs view={view} joined={!!game && !newCode} navigate={setView}/>
   {view!=='home'&&loading&&<div className="loading-banner">Dealing the cards…</div>}
   {serverError&&<div role="alert" className="global-error">Backend connection needed: {serverError} <button onClick={()=>void refresh()}>Retry</button></div>}
   {notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="Dismiss"><X size={16}/></button></div>}
+  {overlay && <HuntDialog key={overlay} overlay={overlay} count={publicStageCount}
+   collected={game?.completed ?? []} active={game?.stage?.position}
+   close={() => setOverlay(null)} onJoin={() => { setOverlay(null); joinHunt(); }}/>}
   {scanning&&<QrScanner onScan={onScan} onClose={()=>setScanning(false)}/>}
  </div>;
 }

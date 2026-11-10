@@ -1,5 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import './hunt.css';
+export const viewport: Viewport = {
+  width: 'device-width', initialScale: 1, viewportFit: 'cover', interactiveWidget: 'resizes-content'
+};
 export const metadata: Metadata = {
   title: "The Joker's Hunt | GUvoices × German Festival",
   description: "Every card holds a clue. A campus-wide treasure hunt from GUtech's Debate Club, 8 December 2026.",
