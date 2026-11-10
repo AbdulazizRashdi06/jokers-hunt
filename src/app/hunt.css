@@ -649,3 +649,27 @@ button.team-admin-card { text-align: left; }
 .team-contact-card .team-admin-card small { display: block; overflow-wrap: anywhere; }
 .captain-contact { font-size: 13px; padding: 12px; border: 1px solid #146fa940; border-top: 0; line-height: 1.4; overflow-wrap: anywhere; }
 .captain-contact a { display: inline-block; padding-block: 7px; color: var(--deep); text-decoration: underline; font-weight: 700; }
+
+/* Registration actions lift on hover and settle under your finger. */
+.join-card .hunt-form > .hunt-button {
+ transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+ .join-card .hunt-form > .hunt-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 7px 8px 0 var(--ink);
+  background-color: #1b7db8;
+ }
+}
+.join-card .hunt-form > .hunt-button:active:not(:disabled) {
+ transform: translate(3px, 3px) scale(.985);
+ box-shadow: 1px 1px 0 var(--ink);
+}
+.join-card .hunt-form > .hunt-button:focus-visible {
+ outline: 3px solid var(--pink-text);
+ outline-offset: 5px;
+}
+@media (prefers-reduced-motion: reduce) {
+ .join-card .hunt-form > .hunt-button { transition: none; }
+ .join-card .hunt-form > .hunt-button:is(:hover, :active):not(:disabled) { transform: none; }
+}
