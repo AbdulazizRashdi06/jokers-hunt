@@ -16,7 +16,7 @@ type Stage={
  qrToken:string;backupCode:string;staffOnly:boolean;enabled:boolean
 };
 type Team={
- id:string;name:string;leaderName:string;size:number;startedAt:string;finishedAt:string|null;
+ id:string;name:string;leaderName:string;captainPhone:string|null;memberNames:string[];size:number;startedAt:string;finishedAt:string|null;
  completed:number;checkpointVerified:string[];currentStageId:string|null
 };
 const blank:Omit<Stage,'id'|'qrToken'|'backupCode'>={
@@ -198,11 +198,14 @@ export default function AdminPage(){
     </div>
     <label className="team-search">FIND A TEAM<input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search team or leader name"/></label>
     <div className="team-grid">
-     {teams.filter(t=>(t.name+' '+t.leaderName).toLowerCase().includes(search.toLowerCase())).map(t=><button type="button" aria-pressed={selectedTeam===t.id} className={`team-admin-card ${selectedTeam===t.id?'selected':''}`} key={t.id}
+     {teams.filter(t=>(t.name+' '+t.leaderName).toLowerCase().includes(search.toLowerCase())).map(t=><div className="team-contact-card" key={t.id}><button type="button" aria-pressed={selectedTeam===t.id} className={`team-admin-card ${selectedTeam===t.id?'selected':''}`} key={t.id}
       onClick={()=>chooseTeam(t.id)}>
       <div><b>{t.name}</b><span>{t.finishedAt?'FINISHED':`${t.completed} cards`}</span></div>
-      <small>Leader: {t.leaderName} · {t.size} players</small>
-     </button>)}
+      <small>Captain: {t.leaderName} · {(t.memberNames||[t.leaderName]).length} / {t.size} joined</small>
+      <small>Roster: {(t.memberNames||[t.leaderName]).join(', ')}</small>
+     </button>
+      <div className="captain-contact">{t.captainPhone?<a href={'tel:'+t.captainPhone.replace(/[^+0-9]/g,'')}>Call captain: {t.captainPhone}</a>:<span>No captain number recorded for this older team.</span>}</div>
+     </div>)}
      {teams.length===0&&<p>No teams registered yet.</p>}
      {teams.length>0&&!teams.some(t=>(t.name+' '+t.leaderName).toLowerCase().includes(search.toLowerCase()))&&<p>No matching teams.</p>}
     </div>

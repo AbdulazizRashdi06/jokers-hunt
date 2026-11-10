@@ -4,15 +4,16 @@ import { randomUUID,randomBytes,createHash,timingSafeEqual } from 'node:crypto';
 import { NextRequest,NextResponse } from 'next/server';
 import { z } from 'zod';
 import path from 'node:path';
+import { captainPhoneSchema } from './team-input';
 
 type Stage={id:string;position:number;title:string;suit:string;locationLabel:string;clue:string;hint:string;question:string;answer:string;qrToken:string;backupCode:string;staffOnly:boolean;enabled:boolean};
 type Progress={stageId:string;verified:boolean;done:boolean;hint:boolean};
-type Team={id:string;name:string;leaderName:string;size:number;accessHash:string;startedAt:string|null;finishedAt:string|null;progress:Progress[];startedPauseSeconds:number;finishedPauseSeconds:number};
+type Team={id:string;name:string;leaderName:string;size:number;accessHash:string;captainPhone?:string;memberNames?:string[];startedAt:string|null;finishedAt:string|null;progress:Progress[];startedPauseSeconds:number;finishedPauseSeconds:number};
 type Store={stages:Stage[];teams:Team[];sessions:Record<string,{teamId?:string;admin?:boolean;expires:number}>;paused:boolean;pausedAt:string|null;pausedTotalSeconds:number;helpPhone:string;audit:{action:string;teamId?:string;reason?:string;at:string}[]};
 const directory=path.join(process.cwd(),'.local-data'),file=path.join(directory,'preview.json');
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 const accessHash=(s:string)=>hash(s.toUpperCase().replace(/[^A-Z0-9]/g,''));
-const access=()=>`JH-${randomBytes(6).toString('hex').toUpperCase().match(/.{4}/g)!.join('-')}`;
+const access=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',c=[...randomBytes(8)].map(b=>a[b%32]).join('');return c.slice(0,4)+'-'+c.slice(4);};
 const now=()=>new Date().toISOString();
 const fail=(status:number,message:string):never=>{throw Object.assign(new Error(message),{status});};
 const equal=(a:string,b:string)=>timingSafeEqual(Buffer.from(hash(a),'hex'),Buffer.from(hash(b),'hex'));
@@ -39,6 +40,7 @@ async function run(r:NextRequest):Promise<NextResponse>{
   }
   await mkdir(directory,{recursive:true,mode:0o700});
   let s:Store;try{s=JSON.parse(await readFile(file,'utf8'));}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;s=initial();}
+  s.teams.forEach(t=>{t.memberNames||=[t.leaderName];});
   const route=r.nextUrl.pathname.replace('/api/local/','');
   let response:NextResponse|undefined;
   const json=(value:unknown)=>NextResponse.json(value,{headers:{'Cache-Control':'no-store'}});
@@ -70,13 +72,16 @@ async function run(r:NextRequest):Promise<NextResponse>{
    }else if(r.method==='DELETE')response=clear('joker_admin');else{isAdmin();response=json({ok:true});}
   }else if(route==='team/logout')response=clear('joker_team');
   else if(route==='team/register'){
-   const name=text('teamName',2,45),leaderName=text('leaderName',2,70),size=z.number().int().min(2).max(10).parse(body.size);
+   const name=text('teamName',2,45),leaderName=text('leaderName',2,70).replace(/\s+/g,' '),size=z.number().int().min(2).max(10).parse(body.size);
    if(s.teams.some(t=>t.name.toLowerCase()===name.toLowerCase()))fail(409,'That team name is taken.');
-   const code=access(),t:Team={id:randomUUID(),name,leaderName,size,accessHash:accessHash(code),startedAt:null,finishedAt:null,progress:[],startedPauseSeconds:0,finishedPauseSeconds:0};s.teams.push(t);
+   const code=access(),t:Team={id:randomUUID(),name,leaderName,size,captainPhone:captainPhoneSchema.parse(body.captainPhone),memberNames:[leaderName],accessHash:accessHash(code),startedAt:null,finishedAt:null,progress:[],startedPauseSeconds:0,finishedPauseSeconds:0};s.teams.push(t);
    const cookie=loginCookie('joker_team',{teamId:t.id});response=json({ok:true,teamName:name,accessCode:code});response.headers.set('set-cookie',cookie.headers.get('set-cookie')!);
   }else if(route==='team/rejoin'){
    const name=text('teamName',2,45),code=text('accessCode',1,40),t=s.teams.find(t=>t.name.toLowerCase()===name.toLowerCase()&&t.accessHash===accessHash(code));
-   if(!t)fail(401,'Team name or code is incorrect.');response=loginCookie('joker_team',{teamId:t!.id});
+   if(!t)fail(401,'Team name or code is incorrect.');
+   const member=text('memberName',2,70).replace(/\s+/g,' ');
+   if(!t!.memberNames!.some(n=>n.toLowerCase()===member.toLowerCase())){if(t!.memberNames!.length>=t!.size)fail(409,'This team is full. Use your existing name to rejoin.');t!.memberNames!.push(member);}
+   response=loginCookie('joker_team',{teamId:t!.id});
   }else if(route==='state'){
    const t=teamAuth(),stage=current(t),p=stage?progress(t,stage.id):null;
    response=json({team:{name:t.name,startedAt:t.startedAt,startedPauseSeconds:t.startedPauseSeconds,finishedAt:t.finishedAt},paused:s.paused,pausedAt:s.pausedAt,pausedTotalSeconds:s.pausedTotalSeconds,total:ss().length,notStarted:!t.startedAt,completed:ss().filter(v=>t.progress.some(p=>p.stageId===v.id&&p.done)).map((v)=>({id:v.id,title:v.title,suit:v.suit,position:ss().findIndex(x=>x.id===v.id)+1})),stage:t.startedAt&&stage?{id:stage.id,position:ss().findIndex(v=>v.id===stage.id)+1,title:stage.title,suit:stage.suit,clue:stage.clue,locationLabel:stage.locationLabel,staffOnly:stage.staffOnly,checkpointVerified:!!p?.verified,hintUsed:!!p?.hint,question:p?.verified?stage.question:null}:null});

@@ -640,3 +640,12 @@ button.team-admin-card { text-align: left; }
  .admin-body { animation: none; }
  ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+.join-code strong { white-space: nowrap; font-size: clamp(23px, 6vw, 32px); letter-spacing: .07em; }
+.hunt-form label small { font-size: 12px; font-weight: 500; line-height: 1.4; letter-spacing: 0; text-transform: none; }
+.hunt-main-register .join-frame { padding-bottom: 26px; }
+.team-contact-card { display: grid; align-content: start; }
+.team-contact-card .team-admin-card { width: 100%; margin: 0; }
+.team-contact-card .team-admin-card small { display: block; overflow-wrap: anywhere; }
+.captain-contact { font-size: 13px; padding: 12px; border: 1px solid #146fa940; border-top: 0; line-height: 1.4; overflow-wrap: anywhere; }
+.captain-contact a { display: inline-block; padding-block: 7px; color: var(--deep); text-decoration: underline; font-weight: 700; }

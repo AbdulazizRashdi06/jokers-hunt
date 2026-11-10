@@ -312,3 +312,16 @@ The site's content security policy blocks third-party resources, embedding, plug
 and cross-origin forms. Next.js still requires inline scripts in this configuration;
 this policy complements input validation and access checks and is not a guarantee
 against all attacks. JSON request bodies are limited to 64 KiB before parsing. Vulnerable Zod and PostCSS versions were updated. Keep framework dependencies updated and use HTTPS in production.
+
+### Team names and prize contact
+New access codes use eight random characters, displayed as `ABCD-EFGH`.
+Old access codes continue to work. Registration requires a captain name/username
+and a valid captain phone number. Each teammate joins with their own name or
+username and the shared code. Returning members use the same name to avoid
+creating another roster entry. Team size limits are enforced on the server.
+Organizers see member names and a captain contact link in Teams & recovery;
+public leaderboard responses never include these details.
+For the server-backed application, apply `supabase/migrations/20261111_team_roster.sql`
+before deploying this update. Existing teams keep their original captain in the
+roster and show “No captain number recorded” for those older registrations.
+The hosted design preview stores demo data only in the current browser.

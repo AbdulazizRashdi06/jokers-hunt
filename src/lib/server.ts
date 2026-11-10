@@ -86,7 +86,7 @@ const alpha='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export function code(length:number) {
  const bytes=randomBytes(length); return [...bytes].map(n=>alpha[n%alpha.length]).join('');
 }
-export function newAccess(){const s=code(12);return `JH-${s.slice(0,4)}-${s.slice(4,8)}-${s.slice(8)}`;}
+export function newAccess(){const s=code(8);return `${s.slice(0,4)}-${s.slice(4)}`;}
 export function newCheckpoint(){return randomBytes(24).toString('base64url');}
 export const makeCookie=(name:string,value:string,days=30)=>{
  const res=NextResponse.json({ok:true}); res.cookies.set(name,value,{

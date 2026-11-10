@@ -5,6 +5,7 @@ import {
  ArrowRight,ArrowUpRight,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Copy,Eye,Flag,
  HelpCircle,LockKeyhole,LogOut,Minus,Plus,RefreshCw,ScanLine,ShieldCheck,Sparkles,Trophy,X
 } from 'lucide-react';
+import { captainPhoneSchema } from '@/lib/team-input';
 import QrScanner from '@/components/QrScanner';
 import { JokerArtwork } from '@/components/HuntArtwork';
 import { HuntDialog,HuntHeader,HuntStory,HuntTabs,suits,type HuntOverlay,type HuntView } from '@/components/HuntIntro';
@@ -58,7 +59,7 @@ export default function Home(){
  [helpPhone,setHelpPhone]=useState(''),
  [publicStageCount,setPublicStageCount]=useState(5),
  [ranks,setRanks]=useState<Rank[]>([]),[registerMode,setRegisterMode]=useState<'new'|'rejoin'>('new'),
- [name,setName]=useState(''),[leader,setLeader]=useState(''),[size,setSize]=useState(3),
+ [name,setName]=useState(''),[leader,setLeader]=useState(''),[captainPhone,setCaptainPhone]=useState(''),[memberName,setMemberName]=useState(''),[size,setSize]=useState(3),
  [accessInput,setAccessInput]=useState(''),[newCode,setNewCode]=useState(''),
  [working,setWorking]=useState(false),[notice,setNotice]=useState(''),
  [scanning,setScanning]=useState(false),[codeInput,setCodeInput]=useState(''),
@@ -138,6 +139,8 @@ export default function Home(){
    setFormError(leader.trim()?'Use at least two characters for the team leader.':'Add the team leader’s name.');
    return;
   }
+  if(registerMode==='new'&&!captainPhoneSchema.safeParse(captainPhone).success){setFormError('Add a valid captain phone number, including country code, so organizers can contact you about prizes.');return;}
+  if(registerMode==='rejoin'&&memberName.trim().length<2){setFormError('Enter your name or username (at least two characters).');return;}
   if(registerMode==='rejoin'&&!accessInput.trim()){
    setFormError('Enter your rejoin code.');
    return;
@@ -145,8 +148,8 @@ export default function Home(){
   setWorking(true);
   try{
    const data=await send(registerMode==='new'?'/api/team/register':'/api/team/rejoin',
-    registerMode==='new'?{teamName:name,leaderName:leader,size}:
-    {teamName:name,accessCode:accessInput});
+    registerMode==='new'?{teamName:name,leaderName:leader,captainPhone,size}:
+    {teamName:name,accessCode:accessInput,memberName});
    await refresh();
    if(data.accessCode)setNewCode(data.accessCode);
    else {setAccessInput('');setView('game');setNotice('Your team is back in the game!');}
@@ -205,7 +208,7 @@ export default function Home(){
   setWorking(true);setFormError('');setNotice('');
   try{
    await send('/api/team/logout',{});
-   setGame(null);setNewCode('');setName('');setLeader('');setAccessInput('');
+   setGame(null);setNewCode('');setName('');setLeader('');setCaptainPhone('');setMemberName('');setAccessInput('');
    setSize(3);setRegisterMode('new');setCopied(false);
   }catch(err){setFormError((err as Error).message);}
   finally{setWorking(false);}
@@ -241,7 +244,7 @@ export default function Home(){
      {newCode ? <div className="join-success">
       <p className="hunt-label"><span aria-hidden>★︎</span> YOU&apos;RE IN THE GAME</p>
       <h2>{game?.team.name || name.trim()}</h2>
-      <p>{size} players. Save this rejoin code somewhere safe. You&apos;ll need it to get back in.</p>
+      <p>{size} players. Share this code with your teammates. Each person joins with their own name or username.</p>
       <div className="join-code"><strong>{newCode}</strong><button type="button" onClick={() => void copyCode()}>
        {copied ? <Check size={16} aria-hidden/> : <Copy size={16} aria-hidden/>}{copied ? 'COPIED' : 'COPY'}
       </button></div>
@@ -255,12 +258,13 @@ export default function Home(){
       <h2>ASSEMBLE YOUR CREW.</h2>
       <div className="join-segment" role="group" aria-label="Team access">
        <button aria-pressed={registerMode==='new'} onClick={() => { setRegisterMode('new'); setFormError(''); }}>New team</button>
-       <button aria-pressed={registerMode==='rejoin'} onClick={() => { setRegisterMode('rejoin'); setFormError(''); }}>Rejoin a team</button>
+       <button aria-pressed={registerMode==='rejoin'} onClick={() => { setRegisterMode('rejoin'); setFormError(''); }}>Join / rejoin</button>
       </div>
       <form className="hunt-form" noValidate onSubmit={event => { event.preventDefault(); void register(); }}>
        <label>TEAM NAME<input value={name} onChange={event => { setName(event.target.value); setFormError(''); }} placeholder="The Wild Cards" maxLength={45}/></label>
        {registerMode==='new' ? <>
-        <label>TEAM LEADER&apos;S NAME<input value={leader} onChange={event => { setLeader(event.target.value); setFormError(''); }} placeholder="Your name" maxLength={70} autoComplete="name"/></label>
+        <label>CAPTAIN&apos;S NAME OR USERNAME<input value={leader} onChange={event => { setLeader(event.target.value); setFormError(''); }} placeholder="Your name" maxLength={70} autoComplete="name"/></label>
+        <label>CAPTAIN&apos;S PHONE NUMBER<input type="tel" inputMode="tel" autoComplete="tel" value={captainPhone} onChange={event=>{setCaptainPhone(event.target.value);setFormError('');}} placeholder="Include your country code" maxLength={30}/><small>Organizers only — used for hunt support and prize collection.</small></label>
         <div className="join-player-row">
          <span id="join-player-label">NUMBER OF PLAYERS</span>
          <div className="join-stepper" role="group" aria-labelledby="join-player-label">
@@ -269,13 +273,13 @@ export default function Home(){
           <button type="button" aria-label="Add one player" disabled={size>=10} onClick={() => setSize(size+1)}><Plus size={18} aria-hidden/></button>
          </div>
         </div>
-       </> : <label>REJOIN CODE<input className="join-rejoin-code" value={accessInput} onChange={event => { setAccessInput(event.target.value.toUpperCase()); setFormError(''); }}
-        placeholder="JH-XXXX-XXXX-XXXX" autoCapitalize="characters" autoComplete="off" spellCheck={false}/></label>}
+       </> : <><label>YOUR NAME OR USERNAME<input value={memberName} onChange={event=>{setMemberName(event.target.value);setFormError('');}} placeholder="Use the same name each time" maxLength={70} autoComplete="nickname"/></label><label>TEAM CODE<input className="join-rejoin-code" value={accessInput} onChange={event => { setAccessInput(event.target.value.toUpperCase()); setFormError(''); }}
+        placeholder="XXXX-XXXX" maxLength={32} autoCapitalize="characters" autoComplete="off" spellCheck={false}/></label></>}
        <button className="hunt-button hunt-blue" disabled={working} type="submit">
-        {working ? 'ONE MOMENT…' : registerMode==='new' ? 'CREATE MY TEAM' : 'REJOIN MY TEAM'} <ArrowRight size={18} aria-hidden/>
+        {working ? 'ONE MOMENT…' : registerMode==='new' ? 'CREATE MY TEAM' : 'JOIN / REJOIN TEAM'} <ArrowRight size={18} aria-hidden/>
        </button>
        {formError ? <p className="hunt-error" role="alert">{formError}</p>
-        : <p className="join-privacy"><ShieldCheck size={16} aria-hidden/> Your leader&apos;s name and team access code are never shown on the leaderboard.</p>}
+        : <p className="join-privacy"><ShieldCheck size={16} aria-hidden/> Names, captain phone numbers and team codes stay off the public leaderboard.</p>}
       </form>
      </>}
     </div>

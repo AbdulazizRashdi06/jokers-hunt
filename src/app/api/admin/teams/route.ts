@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { readJson, action,db,assertDb,adminAuth,audit,ApiError,json,currentStage,keyed,sameHash,newAccess,hashAccess,limit } from '@/lib/server';
 export const GET=action(async()=>{
  await adminAuth();
- const {data:teams,error}=await db.from('teams').select('id,name,leader_name,size,registered_at,started_at,finished_at').order('registered_at');
+ const {data:teams,error}=await db.from('teams').select('id,name,leader_name,captain_phone,member_names,size,registered_at,started_at,finished_at').order('registered_at');
  assertDb(error);
  const {data:progress,error:e}=await db.from('stage_progress').select('team_id,stage_id,checkpoint_verified_at,completed_at');
  assertDb(e);
@@ -12,7 +12,7 @@ export const GET=action(async()=>{
  const ss=await db.from('stages').select('id').eq('enabled',true).order('position').order('id');assertDb(ss.error);
  return json({helpPhone:setting?.help_phone||'',paused:!!setting?.paused,teams:(teams||[]).map(t=>({
   currentStageId:(ss.data||[]).find(s=>!(progress||[]).some(p=>p.team_id===t.id&&p.stage_id===s.id&&p.completed_at))?.id||null,
-  id:t.id,name:t.name,leaderName:t.leader_name,size:t.size,
+  id:t.id,name:t.name,leaderName:t.leader_name,captainPhone:t.captain_phone,memberNames:t.member_names||[t.leader_name],size:t.size,
   startedAt:t.started_at,finishedAt:t.finished_at,
   completed:(progress||[]).filter(p=>p.team_id===t.id&&p.completed_at).length,
   checkpointVerified:(progress||[]).filter(p=>p.team_id===t.id&&p.checkpoint_verified_at&&!p.completed_at).map(p=>p.stage_id)
