@@ -1,3 +1,28 @@
+## Run the local preview (no accounts or cloud services needed)
+
+```sh
+npm ci
+npm run local
+```
+
+Open http://localhost:3002. The preview includes five checkpoints and three
+sample teams, and runs entirely on your computer. Organizer login:
+
+- Email: `organizer@local.test`
+- Password: `JokerLocal!2026`
+
+Try registering a team, then use checkpoint backup codes `DEMO0001` through
+`DEMO0005`. Answers and printable QR codes are available in the organizer editor.
+Sample team rejoin codes are `JH-DEMO-0001-TEAM` (Wild Cards),
+`JH-DEMO-0002-TEAM` (Royal Flush), and `JH-DEMO-0003-TEAM` (The Aces).
+
+Changes are saved in `.local-data/preview.json`, which Git ignores. Stop the
+server and remove `.local-data` to reset the sample data. This preview binds to
+127.0.0.1 and its demo login only works in the explicitly enabled development
+mode; the production login stays unchanged. No `.env.local` file is needed.
+
+---
+
 # 🃏 THE JOKER'S HUNT
 **GUvoices × German Festival · Debate Club · GUtech, Oman · 8 December 2026**
 
@@ -255,3 +280,35 @@ A copied QR URL or backup code can be shared between participants. QR scanning *
 Next.js App Router, React, Tailwind CSS, Supabase JavaScript SDK, Supabase Auth, PostgreSQL + RLS, cryptographic SHA-256/HMAC and AES-GCM, 8-hour admin sessions, 30-day team sessions, and Vercel deployment.
 
 A working backend cannot be deployed from this ZIP without your own Supabase/Vercel accounts, which is why the setup steps are explicit. No real campus locations or credentials have been fabricated.
+
+## November 2026: team support update
+
+Before deploying this update to an existing database, run
+`supabase/migrations/20261111_team_support.sql` in the Supabase SQL editor.
+For a new database, `supabase/schema.sql` already includes these additions.
+Deploy the application after the migration. Without it, the config and teams
+screens cannot read their new settings.
+
+In **Teams & recovery**:
+- Set the player help phone number (blank hides it). This is public to players;
+  use an event contact number rather than a private number you do not want shared.
+- Search by team or leader name and select the team. Its current stage is selected
+  automatically for checkpoint assistance.
+- For a lost rejoin code, first verify the leader's identity in person or by phone.
+  Enter a reason and choose **Replace lost rejoin code**. Share the new code privately.
+  The old code and all existing device sessions are invalidated, while progress stays intact.
+- **Delete selected team** requires two confirmations: a warning, then the exact team
+  name and an audit reason. A signed confirmation expires after five minutes.
+  Only that team and its progress/sessions are removed; stages and other teams remain.
+  Deletion and recovery each write their audit record in the same database transaction.
+
+Organizer sign-in continues to use your existing Supabase email and password.
+Use your password manager's autofill to avoid typing it each time. No email/password
+is embedded in the public bundle. The show-password control only reveals what you
+entered on your own device. Organizer sessions are checked against the allowlist on
+every protected request. Removing an organizer from the allowlist revokes their access.
+Keep Supabase secrets in the deployment environment, never in Git or NEXT_PUBLIC_ variables.
+The site's content security policy blocks third-party resources, embedding, plugins,
+and cross-origin forms. Next.js still requires inline scripts in this configuration;
+this policy complements input validation and access checks and is not a guarantee
+against all attacks. JSON request bodies are limited to 64 KiB before parsing. Vulnerable Zod and PostCSS versions were updated. Keep framework dependencies updated and use HTTPS in production.

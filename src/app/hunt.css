@@ -589,3 +589,48 @@ button, select { user-select: none; }
  .hunt-app .hunt-main { overflow: visible; }
  .hunt-header, .hunt-tabs, .hunt-dialog, .hunt-app .final-reveal-wrap { display: none !important; }
 }
+
+/* A lighter masthead and a more legible supporting deck. */
+.hunt-header { background: var(--deep); border-bottom-color: #fff7e429; }
+.hunt-brand { gap: 11px; letter-spacing: -.025em; }
+.hunt-brand > span { font: 800 clamp(15px, 4vw, 21px)/1 var(--body); letter-spacing: .025em; }
+.hunt-brand .hunt-mark { background: var(--card); border: 0; }
+.hunt-organizer { border-color: #fff7e433; border-radius: 24px; padding-inline: 12px; color: #fff7e4cc; font-size: 12px; font-weight: 600; gap: 6px; }
+.story-tagline { max-width: 32ch; font-size: clamp(17px, 2vw, 21px); line-height: 1.4; }
+.story-tagline strong { font-weight: 600; }
+.deck-side { height: min(81cqh, 69cqw); border: 0; background: transparent; box-shadow: 3px 5px 0 #0d2b4780; }
+.deck-side::after { display: none; }
+.court-artwork { display: block; width: 100%; height: 100%; border-radius: 6px; }
+.deck-left { translate: -105% -45%; }
+.deck-right { translate: 5% -45%; }
+.password-field { display: flex; position: relative; }
+.password-field input { width: 100%; padding-right: 48px !important; }
+.password-field button { position: absolute; right: 0; top: 0; height: 100%; min-width: 44px; display: grid; place-items: center; color: var(--deep); }
+.hunt-main { view-transition-name: hunt-content; animation: page-arrive 360ms var(--enter-ease) both; }
+@keyframes page-arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+::view-transition-old(hunt-content) { animation: page-depart 180ms ease-in both; }
+::view-transition-new(hunt-content) { animation: page-arrive 340ms var(--enter-ease) both; }
+@keyframes page-depart { to { opacity: 0; transform: translateY(-7px); } }
+.hunt-tabs button { transition: color 200ms ease, background 200ms ease; }
+.hunt-tabs button[aria-current='page'] { background: #ffd52f0a; }
+.admin-body { animation: page-arrive 280ms var(--enter-ease) both; }
+.player-support { display: flex; justify-content: center; align-items: center; gap: 8px; background: var(--cream); color: var(--ink); padding: 12px 18px; font-size: 13px; line-height: 1.5; }
+.player-support a { display: inline-block; text-decoration: underline; text-underline-offset: 3px; font-weight: 800; }
+.hunt-main-register, .hunt-main-leaderboard { overflow-y: auto; }
+.hunt-main-register .hunt-join { height: auto; min-height: calc(100% - 58px); }
+.hunt-main-leaderboard .hunt-rankings { height: auto; min-height: calc(100% - 58px); }
+.team-search { display: grid; gap: 8px; margin: 24px 0 16px; font-size: 12px; font-weight: 800; }
+.team-search input { border: 1px solid var(--ink); border-radius: 5px; padding: 12px; background: white; }
+button.team-admin-card { text-align: left; }
+.team-recovery-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.danger-button { border: 1px solid #97364a; color: #862b3d; background: #ffedf0; }
+.support-settings { margin-block: 20px; }
+.support-settings .staff-form { align-items: end; }
+.recovery-code { padding: 18px; border: 2px solid var(--blue); border-radius: 5px; margin: 15px 0; overflow-wrap: anywhere; }
+.recovery-code > b { font-size: 23px; letter-spacing: .06em; }
+.delete-team-dialog h2 { overflow-wrap: anywhere; margin-top: 12px; }
+.delete-team-dialog::backdrop { background: #0d2b47cc; }
+@media (prefers-reduced-motion: reduce) {
+ .admin-body { animation: none; }
+ ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

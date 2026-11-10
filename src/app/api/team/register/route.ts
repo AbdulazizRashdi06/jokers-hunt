@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { action,db,assertDb,ApiError,json,normalizeName,newAccess,hashAccess,sha,limit } from '@/lib/server';
+import { readJson, action,db,assertDb,ApiError,json,normalizeName,newAccess,hashAccess,sha,limit } from '@/lib/server';
 import { randomBytes } from 'node:crypto';
 const schema=z.object({
  teamName:z.string().trim().min(2).max(45),
@@ -9,7 +9,7 @@ const schema=z.object({
 });
 export const POST=action(async(r:NextRequest)=>{
  await limit(r,'team-register',8,3600);
- const v=schema.parse(await r.json());
+ const v=schema.parse(await readJson(r));
  const access=newAccess(),token=randomBytes(32).toString('base64url');
  const {data:t,error}=await db.from('teams').insert({
   name:v.teamName,name_key:normalizeName(v.teamName),leader_name:v.leaderName,

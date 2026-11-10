@@ -6,7 +6,8 @@ import {
  ArrowRight, ArrowUpRight, BookOpen, HelpCircle, Layers, LockKeyhole,
  Trophy, UserPlus, X
 } from 'lucide-react';
-import { HuntMark, JokerArtwork } from './HuntArtwork';
+import OrganizerFields from './OrganizerFields';
+import { HuntMark, JokerArtwork, CourtArtwork } from './HuntArtwork';
 
 export type HuntView = 'home' | 'leaderboard' | 'register' | 'game';
 export type HuntOverlay = 'rules' | 'cards' | 'organizer';
@@ -18,7 +19,7 @@ export function HuntHeader({ onStory, onOrganizer }: { onStory: () => void; onOr
    <button className="hunt-brand" onClick={onStory} aria-label="The Joker's Hunt, The story">
     <HuntMark/><span>JOKER&apos;S <b>HUNT</b></span>
    </button>
-   <button className="hunt-organizer" onClick={onOrganizer}>Organizer login <ArrowUpRight size={16} aria-hidden/></button>
+   <button className="hunt-organizer" onClick={onOrganizer}><LockKeyhole size={15} aria-hidden/><span>Organizer</span></button>
   </div>
  </header>;
 }
@@ -48,18 +49,18 @@ export function HuntStory({ joined, count, onJoin, onOverlay }: {
  return <section className="hunt-story hunt-grid">
   <div className="story-frame">
    <div className="story-heading">
-    <div className="story-chips"><span>GUVOICES × GERMAN FESTIVAL</span><time dateTime="2026-12-08">08 DEC 2026</time></div>
-    <p className="hunt-label story-kicker">AN ADVENTURE FROM THE DEBATE CLUB</p>
+
+
     <h1>THE<br/>{' '}<em>JOKER&apos;S</em><br/>{' '}HUNT<span>.</span></h1>
-    <p className="story-tagline">Every card holds a clue. <strong>Can you outsmart the Joker?</strong></p>
+    <p className="story-tagline"><strong>Can you outsmart the Joker?</strong></p>
    </div>
    <div className="story-deal">
     <div className="story-deck">
      <div className="deck-orbit" aria-hidden/>
      <span className="deck-spark deck-spark-top" aria-hidden>✦</span>
      <span className="deck-spark deck-spark-bottom" aria-hidden>✧</span>
-     <div className="deck-side deck-left" aria-hidden><span>J<small>♠︎</small></span><strong>♠︎</strong></div>
-     <div className="deck-side deck-right" aria-hidden><span>K<small>♦︎</small></span><strong>♦︎</strong></div>
+     <div className="deck-side deck-left" aria-hidden><CourtArtwork rank="J" suit="♠"/></div>
+     <div className="deck-side deck-right" aria-hidden><CourtArtwork rank="K" suit="♦"/></div>
      <button className="joker-flip" type="button" aria-label="Flip the Joker card" aria-pressed={flipped}
       onClick={() => setFlipped(!flipped)}>
       <span className="joker-flip-inner">
@@ -69,7 +70,7 @@ export function HuntStory({ joined, count, onJoin, onOverlay }: {
        </span>
       </span>
      </button>
-     <span className="deck-sticker" aria-hidden>★︎ THE GAME IS ON</span>
+
     </div>
    </div>
    <div className="story-actions">
@@ -128,7 +129,7 @@ export function HuntDialog({ overlay, count, collected, active, close, onJoin }:
   const email = String(data.get('email')).trim();
   const password = String(data.get('password'));
   if (!email || !password) {
-   setError('Enter your organizer email and password.');
+   setError('Enter your organizer login and password.');
    return;
   }
   setBusy(true);
@@ -184,10 +185,9 @@ export function HuntDialog({ overlay, count, collected, active, close, onJoin }:
    {overlay === 'organizer' && <>
     <HuntMark size={48}/>
     <h2 id="hunt-dialog-title">ORGANIZER LOGIN</h2>
-    <p>For Debate Club organizers running the checkpoints on hunt day.</p>
+    <p>Your deck. Your control room.</p>
     <form className="hunt-form" onSubmit={signIn}>
-     <label>ORGANIZER EMAIL<input name="email" type="email" autoComplete="username" placeholder="organizer@example.com"/></label>
-     <label>PASSWORD<input name="password" type="password" autoComplete="current-password" placeholder="Your password"/></label>
+     <OrganizerFields/>
      {error && <p className="hunt-error" role="status">{error}</p>}
      <button className="hunt-button hunt-blue" disabled={busy}>{busy ? 'SIGNING IN…' : 'OPEN THE DASHBOARD'} <ArrowUpRight size={17} aria-hidden/></button>
     </form>

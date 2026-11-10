@@ -5,6 +5,7 @@ import {
  ArrowRight,ArrowUpRight,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Copy,Eye,Flag,
  HelpCircle,LockKeyhole,LogOut,Minus,Plus,RefreshCw,ScanLine,ShieldCheck,Sparkles,Trophy,X
 } from 'lucide-react';
+import { flushSync } from 'react-dom';
 import QrScanner from '@/components/QrScanner';
 import { JokerArtwork } from '@/components/HuntArtwork';
 import { HuntDialog,HuntHeader,HuntStory,HuntTabs,suits,type HuntOverlay,type HuntView } from '@/components/HuntIntro';
@@ -53,8 +54,9 @@ function Confetti(){return <div className="confetti-field" aria-hidden>
  } as React.CSSProperties}/>)}
  </div>}
 export default function Home(){
- const [view,setView]=useState<HuntView>('home'),[game,setGame]=useState<Game|null>(null),
+ const [view,updateView]=useState<HuntView>('home'),[game,setGame]=useState<Game|null>(null),
  [loading,setLoading]=useState(true),[serverError,setServerError]=useState(''),
+ [helpPhone,setHelpPhone]=useState(''),
  [publicStageCount,setPublicStageCount]=useState(5),
  [ranks,setRanks]=useState<Rank[]>([]),[registerMode,setRegisterMode]=useState<'new'|'rejoin'>('new'),
  [name,setName]=useState(''),[leader,setLeader]=useState(''),[size,setSize]=useState(3),
@@ -65,6 +67,14 @@ export default function Home(){
  [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now()),
  [overlay,setOverlay]=useState<HuntOverlay|null>(null),[formError,setFormError]=useState(''),
  [copied,setCopied]=useState(false),[rankPage,setRankPage]=useState(0);
+ function setView(next:HuntView){
+  if(next===view)return;
+  const doc=document as Document & {startViewTransition?:(callback:()=>void)=>{finished:Promise<void>}};
+  if(doc.startViewTransition&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+   const transition=doc.startViewTransition(()=>flushSync(()=>updateView(next)));
+   void transition.finished.catch(()=>{});
+  }else updateView(next);
+ }
  const refresh=useCallback(async()=>{
   const res=await fetch('/api/state',{cache:'no-store'}).catch(()=>null);
   if(!res){setServerError('Could not connect to the game.');setLoading(false);return;}
@@ -75,6 +85,7 @@ export default function Home(){
  },[]);
  useEffect(()=>{void refresh();
   fetch('/api/config').then(r=>r.json()).then(d=>{
+   if(typeof d.helpPhone==='string')setHelpPhone(d.helpPhone);
    if(typeof d.totalStages==='number'&&d.totalStages>0)setPublicStageCount(d.totalStages);
   }).catch(()=>{});
  },[refresh]);
@@ -400,6 +411,7 @@ export default function Home(){
     <p className="rank-footnote"><RefreshCw size={15} aria-hidden/> Rankings update every 15 seconds. Fastest full completion wins the tie between finished teams.</p>
    </div>
   </section>}
+  {view!=='home'&&helpPhone&&<div className="player-support"><HelpCircle size={17} aria-hidden/><span>Need help or lost your code? <a href={'tel:'+helpPhone.replace(/[^+0-9]/g,'')}>Call {helpPhone}</a></span></div>}
   </main>
   <HuntTabs view={view} joined={!!game && !newCode} navigate={setView}/>
   {view!=='home'&&loading&&<div className="loading-banner">Dealing the cards…</div>}

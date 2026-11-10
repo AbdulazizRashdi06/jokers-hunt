@@ -8,3 +8,8 @@ supabase/.temp/
 *.tsbuildinfo
 .DS_Store
 *.log
+
+# Local verification artifacts
+work/
+
+.local-data/

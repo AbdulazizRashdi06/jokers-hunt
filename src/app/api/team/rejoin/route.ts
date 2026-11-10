@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { randomBytes } from 'node:crypto';
-import { action,db,assertDb,ApiError,json,normalizeName,hashAccess,sameHash,sha,limit } from '@/lib/server';
+import { readJson, action,db,assertDb,ApiError,json,normalizeName,hashAccess,sameHash,sha,limit } from '@/lib/server';
 const schema=z.object({teamName:z.string().trim().min(2).max(45),accessCode:z.string().trim().min(10).max(32)});
 export const POST=action(async(r:NextRequest)=>{
- const v=schema.parse(await r.json());
+ const v=schema.parse(await readJson(r));
+ await limit(r,'team-rejoin-total',20,900);
  await limit(r,'team-rejoin',8,900,normalizeName(v.teamName));
  const {data:t,error}=await db.from('teams').select('id,name,access_hash')
  .eq('name_key',normalizeName(v.teamName)).maybeSingle();

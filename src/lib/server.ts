@@ -25,6 +25,7 @@ export function action(handler:(r:NextRequest)=>Promise<NextResponse>) {
   try {
    if(!['GET','HEAD'].includes(r.method)) {
     const origin=r.headers.get('origin');
+    if(r.headers.get('sec-fetch-site')==='cross-site') throw new ApiError(403,'Invalid request origin.');
     // The configured public origin can differ from the URL behind a reverse proxy.
     if(origin && origin!==new URL(r.url).origin && origin!==new URL(siteUrl(r)).origin) {
      throw new ApiError(403,'Invalid request origin.');
@@ -38,6 +39,24 @@ export function action(handler:(r:NextRequest)=>Promise<NextResponse>) {
    return json({error:'Something went wrong. Please try again.'},500);
   }
  };
+}
+// Bound JSON before parsing, including requests without a Content-Length header.
+export async function readJson(r:NextRequest):Promise<unknown>{
+ const max=64*1024;
+ if(Number(r.headers.get('content-length'))>max) throw new ApiError(413,'Request is too large.');
+ const reader=r.body?.getReader();
+ if(!reader) throw new ApiError(400,'A JSON body is required.');
+ const chunks:Uint8Array[]=[];let bytes=0;
+ try{
+  while(true){
+   const {done,value}=await reader.read();if(done)break;
+   bytes+=value.byteLength;
+   if(bytes>max){await reader.cancel();throw new ApiError(413,'Request is too large.');}
+   chunks.push(value);
+  }
+ }finally{reader.releaseLock();}
+ try{return JSON.parse(Buffer.concat(chunks).toString('utf8'));}
+ catch{throw new ApiError(400,'Invalid JSON request.');}
 }
 export const sha=(s:string)=>createHash('sha256').update(s).digest('hex');
 export const keyed=(s:string)=>createHmac('sha256',env('GAME_SECRET')).update(s).digest('hex');
@@ -94,6 +113,9 @@ export async function adminAuth() {
  .eq('token_hash',sha(token)).gt('expires_at',new Date().toISOString()).maybeSingle();
  assertDb(error);
  if(!s) throw new ApiError(401,'Organizer session expired. Please log in.');
+ const {data:allowed,error:allowError}=await db.from('admin_users').select('id').eq('id',s.user_id).maybeSingle();
+ assertDb(allowError);
+ if(!allowed) throw new ApiError(401,'Organizer session expired. Please log in.');
  return s.user_id as string;
 }
 export async function activeGame() {

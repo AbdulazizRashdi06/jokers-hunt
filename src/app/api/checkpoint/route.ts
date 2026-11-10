@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { action,teamAuth,activeGame,currentStage,db,assertDb,hashCheckpoint,sameHash,ApiError,json,limit } from '@/lib/server';
+import { readJson, action,teamAuth,activeGame,currentStage,db,assertDb,hashCheckpoint,sameHash,ApiError,json,limit } from '@/lib/server';
 const schema=z.object({
  stageId:z.string().uuid(),
  value:z.string().trim().min(4).max(300),
@@ -9,7 +9,7 @@ const schema=z.object({
 export const POST=action(async(r:NextRequest)=>{
  const team=await teamAuth(); await activeGame();
  if(!team.started_at) throw new ApiError(409,'Start your hunt before attempting a checkpoint.');
- const v=schema.parse(await r.json());
+ const v=schema.parse(await readJson(r));
  await limit(r,'checkpoint',25,900,team.id);
  const {stage}=await currentStage(team.id);
  if(!stage || stage.id!==v.stageId) throw new ApiError(409,'This is not your current checkpoint.');

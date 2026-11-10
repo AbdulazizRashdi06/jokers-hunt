@@ -44,3 +44,28 @@ export function JokerArtwork({ decorative = false }: { decorative?: boolean }) {
   <path d="m21 195 3 4 4-4-4-5ZM129 23l3 4 4-4-4-5Z" fill="#b9446f"/>
  </svg>;
 }
+
+/** A quieter, engraved court card to frame the Joker. */
+export function CourtArtwork({rank,suit}:{rank:'J'|'K';suit:'♠'|'♦'}){
+ const portrait=useId();
+ const color=suit==='♦'?'#a44762':'#244f70';
+ return <svg viewBox="0 0 150 218" aria-hidden="true" className="court-artwork">
+  <defs><g id={portrait} stroke={color} strokeWidth="1.7" strokeLinejoin="round" fill="none">
+   <path d="M33 109 40 85 60 76h30l20 11 7 22" fill="#dfd8c5"/>
+   <path d="m47 84 28 25 26-25M56 80l38 29m-49-5 14-14m28 16 14-14"/>
+   <path d="M59 48h31l-3 22-12 10-12-8Z" fill="#fffaf0"/>
+   <path d="m58 48-4-18 13 6 8-15 9 15 13-6-5 18Z" fill="#c3ad70"/>
+   <path d="M60 43h30M66 55h3m11 0h3m-8 2-2 7h5m-10 5 10 1"/>
+   <path d="m36 109 5-49m-5 1 5-18 6 18Zm69 48 7-48m-6 0 7-15 5 17"/>
+   <path d="m69 92 6-6 6 6-6 7Z" fill="#c3ad70"/>
+  </g></defs>
+  <rect x="2" y="2" width="146" height="214" rx="6" fill="#f3eddd" stroke="#203040" strokeWidth="3"/>
+  <rect x="9" y="9" width="132" height="200" rx="3" fill="none" stroke={color} strokeWidth="1.2"/>
+  <rect x="29" y="18" width="92" height="182" fill="none" stroke={color}/>
+  <use href={'#'+portrait}/><use href={'#'+portrait} transform="rotate(180 75 109)"/>
+  <path d="M30 109h90" stroke={color}/>
+  {[false,true].map(invert=><g key={String(invert)} transform={invert?'rotate(180 75 109)':undefined} fill={color} fontFamily="Georgia,serif" fontWeight="bold" textAnchor="middle">
+   <text x="19" y="29" fontSize="22">{rank}</text><text x="19" y="47" fontSize="17">{suit}</text>
+  </g>)}
+ </svg>;
+}

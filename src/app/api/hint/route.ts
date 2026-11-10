@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { action,teamAuth,currentStage,db,assertDb,ApiError,json } from '@/lib/server';
+import { readJson, action,teamAuth,currentStage,db,assertDb,ApiError,json } from '@/lib/server';
 export const POST=action(async(r:NextRequest)=>{
- const team=await teamAuth(),v=z.object({stageId:z.string().uuid()}).parse(await r.json());
+ const team=await teamAuth(),v=z.object({stageId:z.string().uuid()}).parse(await readJson(r));
  if(!team.started_at) throw new ApiError(409,'Begin the hunt before requesting a hint.');
  const {stage}=await currentStage(team.id);
  if(!stage||stage.id!==v.stageId) throw new ApiError(409,'This hint is locked.');

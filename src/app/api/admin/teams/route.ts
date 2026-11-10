@@ -1,15 +1,17 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { action,db,assertDb,adminAuth,audit,ApiError,json,currentStage } from '@/lib/server';
+import { readJson, action,db,assertDb,adminAuth,audit,ApiError,json,currentStage,keyed,sameHash,newAccess,hashAccess,limit } from '@/lib/server';
 export const GET=action(async()=>{
  await adminAuth();
  const {data:teams,error}=await db.from('teams').select('id,name,leader_name,size,registered_at,started_at,finished_at').order('registered_at');
  assertDb(error);
  const {data:progress,error:e}=await db.from('stage_progress').select('team_id,stage_id,checkpoint_verified_at,completed_at');
  assertDb(e);
- const {data:setting,error:se}=await db.from('game_settings').select('paused').eq('id',1).single();
+ const {data:setting,error:se}=await db.from('game_settings').select('paused,help_phone').eq('id',1).single();
  assertDb(se);
- return json({paused:!!setting?.paused,teams:(teams||[]).map(t=>({
+ const ss=await db.from('stages').select('id').eq('enabled',true).order('position').order('id');assertDb(ss.error);
+ return json({helpPhone:setting?.help_phone||'',paused:!!setting?.paused,teams:(teams||[]).map(t=>({
+  currentStageId:(ss.data||[]).find(s=>!(progress||[]).some(p=>p.team_id===t.id&&p.stage_id===s.id&&p.completed_at))?.id||null,
   id:t.id,name:t.name,leaderName:t.leader_name,size:t.size,
   startedAt:t.started_at,finishedAt:t.finished_at,
   completed:(progress||[]).filter(p=>p.team_id===t.id&&p.completed_at).length,
@@ -18,10 +20,36 @@ export const GET=action(async()=>{
 });
 export const POST=action(async(r:NextRequest)=>{
  const admin=await adminAuth(),v=z.object({
-  action:z.enum(['staffVerify','unblock','pause','resume']),
+  action:z.enum(['staffVerify','unblock','pause','resume','prepareDelete','deleteTeam','resetAccess']),
   teamId:z.string().uuid().optional(),stageId:z.string().uuid().optional(),
-  reason:z.string().trim().max(400).optional()
- }).parse(await r.json());
+  reason:z.string().trim().max(400).optional(),
+  confirmName:z.string().max(45).optional(),confirmation:z.string().max(256).optional()
+ }).parse(await readJson(r));
+ if(['prepareDelete','deleteTeam','resetAccess'].includes(v.action)){
+  await limit(r,'admin-team-sensitive',20,900,admin);
+  if(!v.teamId) throw new ApiError(400,'Choose a team.');
+  const {data:team,error}=await db.from('teams').select('id,name').eq('id',v.teamId).maybeSingle();
+  assertDb(error);if(!team) throw new ApiError(404,'Team not found.');
+  if(v.action==='prepareDelete'){
+   const expires=Date.now()+5*60*1000;
+   return json({confirmation:expires+':'+keyed(`delete:${admin}:${team.id}:${team.name}:${expires}`)});
+  }
+  if((v.reason||'').length<8) throw new ApiError(400,'Add a reason of at least 8 characters.');
+  if(v.action==='deleteTeam'){
+   const [expiry,signature]=v.confirmation?.split(':')||[];
+   const expires=Number(expiry);
+   if(v.confirmName!==team.name||!signature||!Number.isFinite(expires)||expires<Date.now()||expires>Date.now()+5*60*1000||
+    !sameHash(signature,keyed(`delete:${admin}:${team.id}:${team.name}:${expires}`)))
+    throw new ApiError(400,'Deletion confirmation expired or does not match. Start again.');
+  }
+  const accessCode=v.action==='resetAccess'?newAccess():null;
+  const {data:ok,error:err}=await db.rpc('organizer_team_action',{
+   p_admin:admin,p_team:team.id,p_action:v.action,p_reason:v.reason,
+   p_access_hash:accessCode?hashAccess(accessCode):null,p_confirm_name:v.confirmName||null
+  });assertDb(err);
+  if(!ok) throw new ApiError(404,'Team not found.');
+  return json(accessCode?{ok:true,accessCode}:{ok:true});
+ }
  if(v.action==='pause'||v.action==='resume'){
   const {error}=await db.rpc('set_game_pause',{p_pause:v.action==='pause'});assertDb(error);
   await audit(admin,v.action);return json({ok:true});

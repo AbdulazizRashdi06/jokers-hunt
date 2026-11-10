@@ -6,6 +6,8 @@ import {
  Lock,LogOut,Pause,Play,Plus,Printer,RefreshCw,Save,ShieldCheck,
  Sparkles,Trash2,Users,X,Check,Trophy,RotateCw
 } from 'lucide-react';
+import DeleteTeamDialog from '@/components/DeleteTeamDialog';
+import OrganizerFields from '@/components/OrganizerFields';
 import { HuntMark } from '@/components/HuntArtwork';
 
 type Stage={
@@ -15,7 +17,7 @@ type Stage={
 };
 type Team={
  id:string;name:string;leaderName:string;size:number;startedAt:string;finishedAt:string|null;
- completed:number;checkpointVerified:string[]
+ completed:number;checkpointVerified:string[];currentStageId:string|null
 };
 const blank:Omit<Stage,'id'|'qrToken'|'backupCode'>={
  title:'',suit:'♠',position:1,locationLabel:'[Campus Location]',
@@ -32,7 +34,6 @@ async function post(url:string,payload:unknown,method='POST'){
 }
 export default function AdminPage(){
  const [authorized,setAuthorized]=useState(false),[loading,setLoading]=useState(true),
- [email,setEmail]=useState(''),[password,setPassword]=useState(''),
  [stages,setStages]=useState<Stage[]>([]),[teams,setTeams]=useState<Team[]>([]),
  [paused,setPaused]=useState(false),[tab,setTab]=useState<'stages'|'teams'|'print'>('stages'),
  [editing,setEditing]=useState<Partial<Stage>|null>(null),[notice,setNotice]=useState(''),
@@ -40,10 +41,11 @@ export default function AdminPage(){
  [selectedStage,setSelectedStage]=useState(''),[reason,setReason]=useState(''),
  [qrStage,setQrStage]=useState(''),[copies,setCopies]=useState(3),
  [qrData,setQrData]=useState(''),[printing,setPrinting]=useState(false);
+ const [search,setSearch]=useState(''),[helpPhone,setHelpPhone]=useState(''),[deleteTeam,setDeleteTeam]=useState<Team|null>(null),[recoveryCode,setRecoveryCode]=useState('');
  const refresh=useCallback(async()=>{
   try{
    const [ss,ts]=await Promise.all([req('/api/admin/stages'),req('/api/admin/teams')]);
-   setStages(ss.stages);setTeams(ts.teams);setPaused(!!ts.paused);
+   setStages(ss.stages);setTeams(ts.teams);setPaused(!!ts.paused);setHelpPhone(ts.helpPhone||'');
    setAuthorized(true);
   }catch(e){setNotice((e as Error).message);}
   finally{setLoading(false);}
@@ -52,6 +54,7 @@ export default function AdminPage(){
   req('/api/admin/session').then(()=>void refresh())
   .catch(()=>setLoading(false));
  },[refresh]);
+ useEffect(()=>{setSelectedStage(teams.find(t=>t.id===selectedTeam)?.currentStageId||'');},[teams,selectedTeam]);
  useEffect(()=>{
   const after=()=>setPrinting(false);window.addEventListener('afterprint',after);
   return()=>window.removeEventListener('afterprint',after);
@@ -67,9 +70,9 @@ export default function AdminPage(){
    color:{dark:'#15202A',light:'#FFFFFF'}})).then(data=>{if(!ignore)setQrData(data);})
   .catch(()=>setNotice('Could not generate this QR.'));return()=>{ignore=true;};
  },[qrStage,stages]);
- async function login(e:React.FormEvent){
-  e.preventDefault();setBusy(true);setNotice('');
-  try{await post('/api/admin/session',{email,password});setPassword('');await refresh();}
+ async function login(e:React.FormEvent<HTMLFormElement>){
+  e.preventDefault();const fields=new FormData(e.currentTarget);setBusy(true);setNotice('');
+  try{await post('/api/admin/session',{email:String(fields.get('email')),password:String(fields.get('password'))});await refresh();}
   catch(e){setNotice((e as Error).message);}
   finally{setBusy(false);}
  }
@@ -115,6 +118,20 @@ export default function AdminPage(){
   }catch(e){setNotice((e as Error).message);}
   finally{setBusy(false);}
  }
+ function chooseTeam(id:string){
+  setSelectedTeam(id);setSelectedStage(teams.find(t=>t.id===id)?.currentStageId||'');setRecoveryCode('');setReason('');
+ }
+ async function resetAccess(){
+  if(!confirm('Have you verified the team leader in person or by phone? This replaces the old code and signs out all their devices.'))return;
+  setBusy(true);setNotice('');setRecoveryCode('');
+  try{const data=await post('/api/admin/teams',{action:'resetAccess',teamId:selectedTeam,reason});setRecoveryCode(data.accessCode);setNotice('New code ready. Share it privately with the verified team leader.');}
+  catch(e){setNotice((e as Error).message);}finally{setBusy(false);}
+ }
+ async function saveHelpPhone(){
+  setBusy(true);setNotice('');
+  try{await post('/api/admin/settings',{helpPhone});setNotice('Help number saved. Players will see it when they next open the hunt.');}
+  catch(e){setNotice((e as Error).message);}finally{setBusy(false);}
+ }
  const chosen=stages.find(s=>s.id===qrStage);
  if(loading)return <div className="admin-loading">✦ SHUFFLING THE DECK…</div>;
  if(!authorized)return <div className="admin-login-screen">
@@ -127,8 +144,7 @@ export default function AdminPage(){
    <div className="admin-form-card"><p className="hunt-label">ORGANIZER PORTAL</p>
     <h2>WELCOME, DEALER.</h2><p>Sign in with your organizer account.</p>
     <form onSubmit={login} className="hunt-form">
-     <label>ORGANIZER EMAIL <input type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="organizer@example.com"/></label>
-     <label>PASSWORD <input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Your password"/></label>
+     <OrganizerFields/>
      <button className="hunt-button hunt-blue" disabled={busy}>{busy?'SIGNING IN…':'OPEN THE DASHBOARD'} <ArrowRight size={18} aria-hidden/></button>
     </form>
     {notice&&<p className="hunt-error" role="alert">{notice}</p>}
@@ -177,24 +193,29 @@ export default function AdminPage(){
    {tab==='teams'&&<div className="admin-body">
     <div className="admin-section-heading"><div><h2>TEAM COMMAND CENTER</h2><p>Leader details are private to organizers. Staff interventions are audited.</p></div>
      <a className="btn btn-blue" href="/api/admin/export"><Download size={18}/> Export leaderboard CSV</a></div>
+    <div className="staff-panel support-settings"><h3>PLAYER HELP NUMBER</h3><p>Players can call this number for help, including lost rejoin codes. Only publish a number you want players to see.</p>
+     <form className="staff-form" onSubmit={e=>{e.preventDefault();void saveHelpPhone();}}><label>CONTACT NUMBER<input type="tel" value={helpPhone} maxLength={30} onChange={e=>setHelpPhone(e.target.value)} placeholder="e.g. +968 1234 5678"/></label><button className="btn btn-blue" disabled={busy}><Save size={17}/> Save number</button></form>
+    </div>
+    <label className="team-search">FIND A TEAM<input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search team or leader name"/></label>
     <div className="team-grid">
-     {teams.map(t=><div className={`team-admin-card ${selectedTeam===t.id?'selected':''}`} key={t.id}
-      onClick={()=>{setSelectedTeam(t.id);setSelectedStage('');}}>
+     {teams.filter(t=>(t.name+' '+t.leaderName).toLowerCase().includes(search.toLowerCase())).map(t=><button type="button" aria-pressed={selectedTeam===t.id} className={`team-admin-card ${selectedTeam===t.id?'selected':''}`} key={t.id}
+      onClick={()=>chooseTeam(t.id)}>
       <div><b>{t.name}</b><span>{t.finishedAt?'FINISHED':`${t.completed} cards`}</span></div>
       <small>Leader: {t.leaderName} · {t.size} players</small>
-     </div>)}
+     </button>)}
      {teams.length===0&&<p>No teams registered yet.</p>}
+     {teams.length>0&&!teams.some(t=>(t.name+' '+t.leaderName).toLowerCase().includes(search.toLowerCase()))&&<p>No matching teams.</p>}
     </div>
     <div className="staff-panel">
      <span className="eyebrow dark-kicker"><ShieldCheck size={17}/> EMERGENCY RECOVERY / STAFF ASSISTANCE</span>
-     <h3>CHECKPOINT VERIFICATION</h3>
+     <h3>HELP A TEAM</h3>
      <p>Use when a QR is lost, damaged, or deliberately requires staff verification. Only the current stage can be verified. Puzzle solving remains mandatory unless you explicitly perform a manual unblock.</p>
      <div className="staff-form">
-      <label>TEAM <select value={selectedTeam} onChange={e=>{setSelectedTeam(e.target.value);setSelectedStage('');}}>
+      <label>TEAM <select value={selectedTeam} onChange={e=>chooseTeam(e.target.value)}>
        <option value="">Choose team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
       </select></label>
       <label>STAGE <select value={selectedStage} onChange={e=>setSelectedStage(e.target.value)}>
-       <option value="">Choose their current stage</option>{stages.filter(s=>s.enabled).map(s=><option key={s.id} value={s.id}>{s.position}: {s.title}</option>)}
+       <option value="">No current stage</option>{stages.filter(s=>s.id===teams.find(t=>t.id===selectedTeam)?.currentStageId).map(s=><option key={s.id} value={s.id}>{s.position}: {s.title}</option>)}
       </select></label>
       <label className="wide-field">REASON FOR INTERVENTION <input value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g. Printed checkpoint was missing"/></label>
      </div>
@@ -202,6 +223,9 @@ export default function AdminPage(){
       <button disabled={!selectedTeam||!selectedStage||reason.trim().length<8||busy} className="btn btn-blue" onClick={()=>void teamAction('staffVerify')}><Check size={18}/> Verify checkpoint only</button>
       <button disabled={!selectedTeam||!selectedStage||reason.trim().length<8||busy} className="btn btn-outline" onClick={()=>void teamAction('unblock')}><ShieldCheck size={18}/> Manual unblock (bypass puzzle)</button>
      </div>
+     <div className="team-recovery-actions"><button className="btn btn-outline" disabled={!selectedTeam||busy||reason.trim().length<8} onClick={()=>void resetAccess()}><Lock size={17}/> Replace lost rejoin code</button>
+      <button className="btn danger-button" disabled={!selectedTeam||busy} onClick={()=>setDeleteTeam(teams.find(t=>t.id===selectedTeam)||null)}><Trash2 size={17}/> Delete selected team</button></div>
+     {recoveryCode&&<div className="recovery-code" role="status"><b>{recoveryCode}</b><p>Share privately with the verified leader. Old codes and device sessions no longer work.</p><button className="btn btn-outline" onClick={()=>setRecoveryCode('')}>Hide code</button></div>}
      <small>Warning: manual unblock overrides the normal challenge and leaves an audit record. Use sparingly for fairness.</small>
     </div>
    </div>}
@@ -232,6 +256,7 @@ export default function AdminPage(){
     </div>}
    </div>}
   </div>
+  {deleteTeam&&<DeleteTeamDialog team={deleteTeam} close={()=>setDeleteTeam(null)} deleted={()=>{setDeleteTeam(null);chooseTeam('');void refresh();setNotice('Team deleted. Other teams and stages are unchanged.');}}/>}
   {editing&&<div className="modal-shade admin-modal-layer" role="dialog" aria-modal="true" aria-label="Edit stage">
    <div className="modal-card admin-edit-modal">
     <div className="edit-modal-header"><div><span className="eyebrow dark-kicker">BEHIND THE CARDS</span>

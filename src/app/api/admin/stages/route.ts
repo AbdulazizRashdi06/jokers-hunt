@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { action,db,assertDb,adminAuth,audit,unseal,seal,hashAnswer,
+import { readJson,action,db,assertDb,adminAuth,audit,unseal,seal,hashAnswer,
  hashCheckpoint,newCheckpoint,code,ApiError,json } from '@/lib/server';
 
 const base=z.object({
@@ -29,7 +29,7 @@ export const GET=action(async()=>{
 });
 export const POST=action(async(r:NextRequest)=>{
  const admin=await adminAuth();
- const body=await r.json();
+ const body=z.object({action:z.unknown(),ids:z.unknown().optional(),stage:z.unknown().optional(),id:z.unknown().optional()}).parse(await readJson(r));
  const verb=z.enum(['create','update','delete','rotateQr','rotateBackup','reorder']).parse(body.action);
  if(verb==='reorder'){
   const ids=z.array(z.string().uuid()).min(1).max(100).parse(body.ids);
