@@ -673,3 +673,56 @@ button.team-admin-card { text-align: left; }
  .join-card .hunt-form > .hunt-button { transition: none; }
  .join-card .hunt-form > .hunt-button:is(:hover, :active):not(:disabled) { transform: none; }
 }
+
+/* A celebratory card-table setting for the standings. */
+.hunt-rankings {
+ position: relative; isolation: isolate;
+ background: radial-gradient(circle at 94% 12%, #cf5a8312, transparent 36%),
+  linear-gradient(#146fa908 1px, transparent 1px), linear-gradient(90deg, #146fa908 1px, transparent 1px), var(--cream);
+ background-size: auto, 39px 39px, 39px 39px, auto;
+}
+.rank-frame { width: min(100%, 930px); margin: 0 auto; padding-block: 22px 18px; display: flex; flex-direction: column; }
+.rank-hero { gap: 12px; }
+.rank-hero h1 { font-size: clamp(36px, 7.5vw, 76px); }
+.rank-hero h1 em br { display: initial; }
+.rank-trophy-scene { flex: 0 0 42%; max-width: 250px; min-width: 0; }
+.leaderboard-artwork { display: block; width: 100%; height: auto; filter: drop-shadow(3px 5px 0 #131d2a15); animation: rank-prize-float 6s ease-in-out infinite; }
+.rank-intro { font-size: 16px; margin: 12px 0 18px; color: var(--deep); font-weight: 600; }
+.rank-card { flex: none; box-shadow: 6px 6px 0 var(--deep); }
+.rank-table th { padding-block: 12px; }
+.rank-table td { height: 54px; }
+.rank-podium.rank-place-1 { background: #ffd52f26; }
+.rank-podium.rank-place-2 .hunt-rank-badge { background: #dfeaf0; }
+.rank-podium.rank-place-3 .hunt-rank-badge { background: #f1d6d3; }
+.rank-first { box-shadow: 2px 2px 0 var(--ink); rotate: -5deg; }
+.rank-footnote { margin-top: 15px; }
+.rank-deck-decoration { position: relative; flex: 1; min-height: 165px; max-height: 245px; width: min(100%, 500px); align-self: center; margin: auto 0 0; pointer-events: none; }
+.rank-mini-card { position: absolute; bottom: 18px; left: 50%; width: 82px; height: 119px; filter: drop-shadow(3px 5px 0 #0d2b4729); }
+.rank-mini-card svg { width: 100%; height: 100%; }
+.mini-queen { transform: translateX(-115%) rotate(-21deg); }
+.mini-king { transform: translateX(15%) rotate(21deg); }
+.mini-joker { transform: translateX(-50%) translateY(-6px); }
+.rank-scatter { position: absolute; color: var(--pink-text); line-height: 1; }
+.scatter-one { top: 26%; left: 14%; font-size: 32px; color: #bf8f11; animation: rank-twinkle 4s ease-in-out infinite; }
+.scatter-two { bottom: 19%; right: 12%; font-size: 42px; color: var(--blue); animation: rank-twinkle 4s 1s ease-in-out infinite; }
+.scatter-three { left: 6%; bottom: 18%; font-size: 19px; rotate: -15deg; }
+.scatter-four { right: 8%; top: 22%; font-size: 22px; color: var(--deep); rotate: 14deg; }
+.scatter-five { right: 27%; top: 12%; font-size: 16px; color: var(--pink-text); }
+@keyframes rank-prize-float { 50% { transform: translateY(-4px) rotate(1deg); } }
+@keyframes rank-twinkle { 50% { opacity: .55; transform: scale(.85) rotate(12deg); } }
+@media (min-width: 720px) {
+ .rank-frame { padding-top: 25px; }
+ .rank-hero { min-height: 185px; }
+ .rank-table td { height: 59px; font-size: 16px; }
+ .rank-table th { font-size: 13px; }
+ .rank-mini-card { width: 100px; height: 145px; }
+ .rank-deck-decoration { min-height: 195px; }
+}
+@media (max-width: 380px) {
+ .rank-hero h1 { font-size: 33px; }
+ .rank-trophy-scene { flex-basis: 39%; }
+ .rank-intro { font-size: 14px; }
+ .rank-table td { height: 48px; font-size: 13px; }
+}
+
+@media (min-width: 950px) { .rank-hero h1 em br { display: none; } }

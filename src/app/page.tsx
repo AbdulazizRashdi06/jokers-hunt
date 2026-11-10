@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { captainPhoneSchema } from '@/lib/team-input';
 import QrScanner from '@/components/QrScanner';
-import { JokerArtwork } from '@/components/HuntArtwork';
+import { JokerArtwork, CourtArtwork, LeaderboardArtwork } from '@/components/HuntArtwork';
 import { HuntDialog,HuntHeader,HuntStory,HuntTabs,suits,type HuntOverlay,type HuntView } from '@/components/HuntIntro';
 
 type Stage={
@@ -393,9 +393,9 @@ export default function Home(){
    <div className="rank-frame">
     <div className="rank-hero">
      <div><p className="hunt-label">THE GAME IS AFOOT</p><h1>THE<br/><em>LEADER<br/>BOARD.</em></h1></div>
-     <div className="rank-trophy" aria-hidden><Trophy size={47}/><span>✦</span></div>
+     <div className="rank-trophy-scene"><LeaderboardArtwork/></div>
     </div>
-    <p className="rank-intro">Who is playing the strongest hand? Team names only; private details stay private.</p>
+    <p className="rank-intro">Who is playing the strongest hand?</p>
     <div className="rank-card">
      <table className="rank-table">
       <caption className="sr-only">Team standings</caption>
@@ -406,7 +406,7 @@ export default function Home(){
         <p>No teams to rank yet. Be the first to make your mark!</p>
         <button className="hunt-button hunt-yellow" onClick={joinHunt}>{game && !newCode ? 'CONTINUE MY HUNT' : 'JOIN THE HUNT'} <ArrowRight size={17} aria-hidden/></button>
        </div></td></tr>
-       : ranks.slice(currentRankPage*5,currentRankPage*5+5).map(row => <tr key={row.rank}>
+       : ranks.slice(currentRankPage*5,currentRankPage*5+5).map(row => <tr key={row.rank} className={row.rank<=3?'rank-podium rank-place-'+row.rank:undefined}>
         <td><span className={'hunt-rank-badge' + (row.rank===1 ? ' rank-first' : '')}>{pads(row.rank)}</span></td>
         <td className="hunt-rank-name"><span title={row.name}>{row.name}</span></td>
         <td className="hunt-rank-number">{row.stages} / {row.total}</td>
@@ -420,7 +420,15 @@ export default function Home(){
       <button aria-label="Next rankings page" disabled={currentRankPage===rankPages-1} onClick={() => setRankPage(currentRankPage+1)}><ChevronRight size={19} aria-hidden/></button>
      </div>}
     </div>
-    <p className="rank-footnote"><RefreshCw size={15} aria-hidden/> Rankings update every 15 seconds. Fastest full completion wins the tie between finished teams.</p>
+    <p className="rank-footnote"><RefreshCw size={15} aria-hidden/> Standings refresh every 15 seconds.</p>
+    <div className="rank-deck-decoration" aria-hidden="true">
+     <span className="rank-scatter scatter-one">✦</span><span className="rank-scatter scatter-two">✧</span>
+     <span className="rank-scatter scatter-three">♦</span><span className="rank-scatter scatter-four">♣</span>
+     <div className="rank-mini-card mini-queen"><CourtArtwork rank="Q" suit="♠"/></div>
+     <div className="rank-mini-card mini-king"><CourtArtwork rank="K" suit="♦"/></div>
+     <div className="rank-mini-card mini-joker"><JokerArtwork decorative/></div>
+     <span className="rank-scatter scatter-five">✦</span>
+    </div>
    </div>
   </section>}
   {view!=='home'&&helpPhone&&<div className="player-support"><HelpCircle size={17} aria-hidden/><span>Need help or lost your code? <a href={'tel:'+helpPhone.replace(/[^+0-9]/g,'')}>Call {helpPhone}</a></span></div>}

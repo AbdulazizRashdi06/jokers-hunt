@@ -87,3 +87,35 @@ export function CourtArtwork({rank,suit}:{rank:'Q'|'K';suit:'♠'|'♦'}){
   </g>)}
  </svg>;
 }
+
+export function LeaderboardArtwork(){
+ return <svg className="leaderboard-artwork" viewBox="0 0 280 230" aria-hidden="true">
+  <circle cx="143" cy="113" r="91" fill="#f0d7df"/>
+  <circle cx="143" cy="113" r="103" fill="none" stroke="#b9446f" strokeDasharray="3 8" opacity=".4"/>
+  <g transform="translate(29 58) rotate(-19 45 63)" stroke="#131d2a" strokeWidth="2">
+   <rect width="86" height="126" rx="6" fill="#fffaf0"/>
+   <rect x="7" y="7" width="72" height="112" rx="2" fill="none" stroke="#b9446f"/>
+   <g fill="#b9446f" stroke="none" fontFamily="Georgia,serif" fontWeight="bold"><text x="12" y="29" fontSize="23">A</text><text x="12" y="47" fontSize="18">♦</text><text x="43" y="88" fontSize="50" textAnchor="middle">♦</text></g>
+  </g>
+  <g transform="translate(169 56) rotate(17 43 63)" stroke="#131d2a" strokeWidth="2">
+   <rect width="86" height="126" rx="6" fill="#fffaf0"/>
+   <rect x="7" y="7" width="72" height="112" rx="2" fill="none" stroke="#146fa9"/>
+   <g fill="#146fa9" stroke="none" fontFamily="Georgia,serif" fontWeight="bold"><text x="12" y="29" fontSize="23">A</text><text x="12" y="47" fontSize="18">♠</text><text x="43" y="88" fontSize="50" textAnchor="middle">♠</text></g>
+  </g>
+  <g stroke="#131d2a" strokeWidth="2.8" strokeLinejoin="round">
+   <path d="M107 71H82v20q0 33 39 35m58-55h25v20q0 33-39 35" fill="none" strokeWidth="8"/>
+   <path d="M107 71H82v20q0 33 39 35m58-55h25v20q0 33-39 35" fill="none" stroke="#e4b729" strokeWidth="3"/>
+   <path d="M132 128h22v40h-22Z" fill="#e4b729"/>
+   <path d="M103 56h80l-5 48q-5 34-35 34t-35-34Z" fill="#ffd52f"/>
+   <path d="m172 63-4 38q-2 20-17 27" stroke="#e4b729" strokeWidth="7" fill="none"/>
+   <path d="m143 76 6 12 14 2-10 10 2 14-12-7-12 7 2-14-10-10 14-2Z" fill="#fffaf0"/>
+   <path d="M122 162h42l8 12v11h-58v-11Z" fill="#ffd52f"/>
+   <path d="M105 186h76v12h-76Z" fill="#e4b729"/>
+   <path d="m88 147 25-7v27l-25 7 5-15Zm110 0-25-7v27l25 7-5-15Z" fill="#b9446f"/>
+   <path d="M107 141q36 12 72 0v24q-36 12-72 0Z" fill="#146fa9"/>
+  </g>
+  <g fill="#ffd52f" stroke="#131d2a" strokeWidth="1.4"><path d="m57 18 4 12 12 4-12 4-4 12-4-12-12-4 12-4Z"/><path d="m231 170 4 11 11 4-11 4-4 11-4-11-11-4 11-4Z"/></g>
+  <g fill="#b9446f"><path d="m229 30 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/><circle cx="28" cy="170" r="3"/><circle cx="194" cy="19" r="3"/></g>
+  <path d="m121 35 5 9m35-10-4 9m-14-18v13M28 203l9-4m211-82 9 3" stroke="#146fa9" strokeWidth="3" strokeLinecap="round"/>
+ </svg>;
+}
