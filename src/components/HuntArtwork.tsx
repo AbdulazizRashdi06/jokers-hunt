@@ -46,18 +46,36 @@ export function JokerArtwork({ decorative = false }: { decorative?: boolean }) {
 }
 
 /** A quieter, engraved court card to frame the Joker. */
-export function CourtArtwork({rank,suit}:{rank:'J'|'K';suit:'♠'|'♦'}){
+export function CourtArtwork({rank,suit}:{rank:'Q'|'K';suit:'♠'|'♦'}){
  const portrait=useId();
- const color=suit==='♦'?'#a44762':'#244f70';
+ const queen=rank==='Q';
+ const color=queen?'#a44762':'#244f70';
  return <svg viewBox="0 0 150 218" aria-hidden="true" className="court-artwork">
   <defs><g id={portrait} stroke={color} strokeWidth="1.7" strokeLinejoin="round" fill="none">
-   <path d="M33 109 40 85 60 76h30l20 11 7 22" fill="#dfd8c5"/>
-   <path d="m47 84 28 25 26-25M56 80l38 29m-49-5 14-14m28 16 14-14"/>
-   <path d="M59 48h31l-3 22-12 10-12-8Z" fill="#fffaf0"/>
-   <path d="m58 48-4-18 13 6 8-15 9 15 13-6-5 18Z" fill="#c3ad70"/>
-   <path d="M60 43h30M66 55h3m11 0h3m-8 2-2 7h5m-10 5 10 1"/>
-   <path d="m36 109 5-49m-5 1 5-18 6 18Zm69 48 7-48m-6 0 7-15 5 17"/>
-   <path d="m69 92 6-6 6 6-6 7Z" fill="#c3ad70"/>
+   {queen?<>
+    <path d="M53 47Q46 53 50 67L44 80l12 12 10-17h21l10 17 9-12-7-16q5-15-8-19Z" fill="#c9ae71"/>
+    <path d="M39 109 47 87 63 77h22l18 10 10 22" fill="#e6c6cc"/>
+    <path d="m50 86 25 23 24-23M59 82l16 17 16-17M59 98l-7 11m39-11 7 11"/>
+    <path d="M61 46q14-9 27 1l-2 18-10 12-10-7Z" fill="#fffaf0"/>
+    <path d="M59 49q8-2 13-9 5 7 17 8l-1-10H61Z" fill="#c9ae71"/>
+    <path d="m60 37-3-13 11 6 7-15 8 15 10-6-3 13Z" fill="#c3ad70"/>
+    <path d="M61 37h28M65 54l5-1m10 0 4 1m-9 1-1 8h4m-8 5q5 3 10-1"/>
+    <path d="m65 52 2-2m15 2 2-2M56 58q-7 7 0 14t-2 12m37-27q7 9 1 16t5 11"/>
+    <circle cx="61" cy="63" r="2" fill="#c3ad70"/><circle cx="89" cy="63" r="2" fill="#c3ad70"/>
+    <path d="M65 77q10 13 20 0m-18 6q8 8 16 0"/>
+    <path d="m108 109-2-44m0 15 8-8m-8 16-7-8"/>
+    <path d="M106 65c-13-6-8-14-2-11 0-11 11-11 9-2 10 0 9 12-7 13Z" fill="#d4a0b0"/>
+    <path d="m106 57 2 4"/>
+    <path d="m71 94 4-5 4 5-4 6Z" fill="#c3ad70"/>
+   </>:<>
+    <path d="M33 109 40 85 60 76h30l20 11 7 22" fill="#c9d8df"/>
+    <path d="m47 84 28 25 26-25M56 80l38 29m-49-5 14-14m28 16 14-14"/>
+    <path d="M59 48h31l-3 22-12 10-12-8Z" fill="#fffaf0"/>
+    <path d="m58 48-4-18 13 6 8-15 9 15 13-6-5 18Z" fill="#c3ad70"/>
+    <path d="M60 43h30M66 55h3m11 0h3m-8 2-2 7h5m-10 5 10 1"/>
+    <path d="m36 109 5-49m-5 1 5-18 6 18Zm69 48 7-48m-6 0 7-15 5 17"/>
+    <path d="m69 92 6-6 6 6-6 7Z" fill="#c3ad70"/>
+   </>}
   </g></defs>
   <rect x="2" y="2" width="146" height="214" rx="6" fill="#f3eddd" stroke="#203040" strokeWidth="3"/>
   <rect x="9" y="9" width="132" height="200" rx="3" fill="none" stroke={color} strokeWidth="1.2"/>

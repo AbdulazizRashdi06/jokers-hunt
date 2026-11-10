@@ -59,7 +59,7 @@ export function HuntStory({ joined, count, onJoin, onOverlay }: {
      <div className="deck-orbit" aria-hidden/>
      <span className="deck-spark deck-spark-top" aria-hidden>✦</span>
      <span className="deck-spark deck-spark-bottom" aria-hidden>✧</span>
-     <div className="deck-side deck-left" aria-hidden><CourtArtwork rank="J" suit="♠"/></div>
+     <div className="deck-side deck-left" aria-hidden><CourtArtwork rank="Q" suit="♠"/></div>
      <div className="deck-side deck-right" aria-hidden><CourtArtwork rank="K" suit="♦"/></div>
      <button className="joker-flip" type="button" aria-label="Flip the Joker card" aria-pressed={flipped}
       onClick={() => setFlipped(!flipped)}>

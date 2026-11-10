@@ -1,11 +1,10 @@
 'use client';
 
-import { useState,useEffect,useCallback,useMemo } from 'react';
+import { useState,useEffect,useCallback,useMemo,useRef } from 'react';
 import {
  ArrowRight,ArrowUpRight,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Copy,Eye,Flag,
  HelpCircle,LockKeyhole,LogOut,Minus,Plus,RefreshCw,ScanLine,ShieldCheck,Sparkles,Trophy,X
 } from 'lucide-react';
-import { flushSync } from 'react-dom';
 import QrScanner from '@/components/QrScanner';
 import { JokerArtwork } from '@/components/HuntArtwork';
 import { HuntDialog,HuntHeader,HuntStory,HuntTabs,suits,type HuntOverlay,type HuntView } from '@/components/HuntIntro';
@@ -67,13 +66,22 @@ export default function Home(){
  [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now()),
  [overlay,setOverlay]=useState<HuntOverlay|null>(null),[formError,setFormError]=useState(''),
  [copied,setCopied]=useState(false),[rankPage,setRankPage]=useState(0);
+ const [pagePhase,setPagePhase]=useState<'enter'|'exit'>('enter');
+ const [pageDirection,setPageDirection]=useState(1);
+ const navigationTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+ useEffect(()=>()=>{if(navigationTimer.current)clearTimeout(navigationTimer.current);},[]);
  function setView(next:HuntView){
-  if(next===view)return;
-  const doc=document as Document & {startViewTransition?:(callback:()=>void)=>{finished:Promise<void>}};
-  if(doc.startViewTransition&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-   const transition=doc.startViewTransition(()=>flushSync(()=>updateView(next)));
-   void transition.finished.catch(()=>{});
-  }else updateView(next);
+  if(navigationTimer.current)clearTimeout(navigationTimer.current);
+  if(next===view){setPagePhase('enter');return;}
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+   updateView(next);setPagePhase('enter');return;
+  }
+  const order={home:0,leaderboard:1,register:2,game:2};
+  setPageDirection(order[next]>=order[view]?1:-1);
+  setPagePhase('exit');
+  navigationTimer.current=setTimeout(()=>{
+   updateView(next);setPagePhase('enter');navigationTimer.current=null;
+  },220);
  }
  const refresh=useCallback(async()=>{
   const res=await fetch('/api/state',{cache:'no-store'}).catch(()=>null);
@@ -220,7 +228,7 @@ export default function Home(){
  }),[game]);
  return <div className="hunt-app">
   <HuntHeader onStory={() => setView('home')} onOrganizer={() => setOverlay('organizer')}/>
-  <main key={view} className={'hunt-main hunt-main-' + view}>
+  <main key={view} className={'hunt-main hunt-main-' + view + ' page-' + pagePhase} style={{'--page-direction':pageDirection} as React.CSSProperties} aria-busy={pagePhase==='exit'}>
   {view==='home'&&<HuntStory joined={!!game && !newCode} count={publicStageCount} onJoin={joinHunt} onOverlay={setOverlay}/>}
 
   {view==='register'&&<section className="hunt-join hunt-grid">
