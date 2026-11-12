@@ -97,7 +97,8 @@ async function run(r:NextRequest):Promise<NextResponse>{
    response=json({ok:true,message:route==='checkpoint'?'Checkpoint verified. Solve the puzzle!':'Card collected!'});}
   }else if(route.startsWith('admin/')){
    isAdmin();
-   if(route==='admin/settings'){s.helpPhone=text('helpPhone',0,30);if(s.helpPhone&&(!/^\+?[0-9 ()-]{6,30}$/.test(s.helpPhone)||s.helpPhone.replace(/\D/g,'').length<6||s.helpPhone.replace(/\D/g,'').length>15))fail(400,'Enter a phone number.');response=json({ok:true});}
+   if(route==='admin/leaderboard')response=json({rows:rankings(),paused:s.paused});
+   else if(route==='admin/settings'){s.helpPhone=text('helpPhone',0,30);if(s.helpPhone&&(!/^\+?[0-9 ()-]{6,30}$/.test(s.helpPhone)||s.helpPhone.replace(/\D/g,'').length<6||s.helpPhone.replace(/\D/g,'').length>15))fail(400,'Enter a phone number.');response=json({ok:true});}
    else if(route==='admin/teams'){
     if(r.method==='POST'){
      const verb=text('action');if(verb==='pause'||verb==='resume'){

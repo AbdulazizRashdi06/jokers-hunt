@@ -153,7 +153,7 @@ export default function AdminPage(){
  </div>;
  return <div className="admin-shell">
   <header className="admin-header"><a href="/" className="admin-brand"><HuntMark/><span>JOKER&apos;S <b>HUNT</b></span><small>CONTROL ROOM</small></a>
-   <div className="admin-nav"><button onClick={()=>void refresh()} aria-label="Refresh dashboard"><RefreshCw size={17} aria-hidden/><span>Refresh</span></button>
+   <div className="admin-nav"><a className="screen-open-link" href="/admin/screen" target="_blank" rel="noopener noreferrer"><Trophy size={17}/> Live display</a><button onClick={()=>void refresh()} aria-label="Refresh dashboard"><RefreshCw size={17} aria-hidden/><span>Refresh</span></button>
     <button onClick={()=>void logout()} aria-label="Log out"><LogOut size={17} aria-hidden/><span>Log out</span></button></div></header>
   <div className="admin-wrap">
    <div className="admin-top"><div><span className="eyebrow dark-kicker">GUVOICES × GERMAN FESTIVAL</span>

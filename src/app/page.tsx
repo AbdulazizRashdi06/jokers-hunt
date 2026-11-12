@@ -66,7 +66,8 @@ export default function Home(){
  [scanned,setScanned]=useState(''),[answer,setAnswer]=useState(''),
  [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now()),
  [overlay,setOverlay]=useState<HuntOverlay|null>(null),[formError,setFormError]=useState(''),
- [copied,setCopied]=useState(false),[rankPage,setRankPage]=useState(0);
+ [copied,setCopied]=useState(false),[rankPage,setRankPage]=useState(0),[rankPageSize,setRankPageSize]=useState(5);
+ useEffect(()=>{const resize=()=>setRankPageSize(window.innerHeight<700?3:5);resize();window.addEventListener('resize',resize);return()=>window.removeEventListener('resize',resize);},[]);
  const [pagePhase,setPagePhase]=useState<'enter'|'exit'>('enter');
  const [pageDirection,setPageDirection]=useState(1);
  const navigationTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -214,7 +215,7 @@ export default function Home(){
   finally{setWorking(false);}
  }
  const joinHunt=()=>setView(game&&!newCode?'game':'register');
- const rankPages=Math.max(1,Math.ceil(ranks.length/5));
+ const rankPages=Math.max(1,Math.ceil(ranks.length/rankPageSize));
  const currentRankPage=Math.min(rankPage,rankPages-1);
  const elapsed=game?.team.startedAt?duration(
   ((game.paused&&game.pausedAt?new Date(game.pausedAt).getTime():clock)-
@@ -318,10 +319,10 @@ export default function Home(){
      <div className="dashboard-header">
       <div><span className="eyebrow">WELCOME TO THE GAME,</span>
        <h1>{game.team.name}<span> ✦</span></h1>
-       <p>The Joker has a new challenge waiting for you.</p></div>
+       </div>
       <div className="game-timer"><Clock3 size={18}/><div><small>YOUR HUNT TIME</small><strong>{elapsed}</strong></div></div>
      </div>
-     {game.paused&&<div className="paused-banner"><LockKeyhole/> The game is paused by the organizers. You can review your clues, but cannot advance yet.</div>}
+     {game.paused&&<div className="paused-banner"><LockKeyhole/> Hunt paused by organizers.</div>}
      <div className="dashboard-grid">
       <div className="dashboard-main">
        <div className="collection-panel">
@@ -336,7 +337,7 @@ export default function Home(){
        {game.notStarted&&<div className="start-panel">
         <span className="eyebrow dark-kicker">★ YOUR DECK IS READY</span>
         <h2>READY TO START THE CLOCK?</h2>
-        <p>Your team is registered, but the timer has not begun. When everyone is ready at GUtech, start the hunt to reveal your first clue. This keeps early registration from adding hours to your time.</p>
+        <p>Start when your team is ready. Your timer begins then.</p>
         <button className="btn btn-yellow" disabled={working||game.paused} onClick={()=>void startHunt()}>
          {working?'Preparing the deck…':'Begin the hunt'} <ArrowRight size={19}/></button>
        </div>}
@@ -344,11 +345,10 @@ export default function Home(){
         <div className="stage-head"><div className="stage-number">0{game.stage.position}</div>
          <div><span className="eyebrow">YOUR CURRENT MISSION</span><h2>{game.stage.title}</h2></div>
         <div className="stage-suit" aria-hidden>{game.stage.suit+'\uFE0E'}</div></div>
-        <div className="clue-box"><span><Eye size={18}/> THE JOKER&apos;S CLUE</span><p>“{game.stage.clue}”</p></div>
         <div className="location-line"><Flag size={19}/><span>{game.stage.locationLabel}</span></div>
         {!game.stage.checkpointVerified?<div className="checkpoint-area">
          <div className="checkpoint-title"><ScanLine/><div><h3>FIND THE CHECKPOINT.</h3>
-          <p>{game.stage.staffOnly?'This stage needs an organizer to verify your arrival.':"Spot the Joker QR at your location. Can't scan it? Use the printed backup code."}</p></div></div>
+          <p>{game.stage.staffOnly?'This stage needs an organizer to verify your arrival.':"Scan the QR or enter its backup code."}</p></div></div>
          {!game.stage.staffOnly&&<>
           <div className="scan-actions">
            <button className="btn btn-blue" onClick={()=>setScanning(true)}><ScanLine size={20}/> Scan QR with camera</button>
@@ -362,7 +362,7 @@ export default function Home(){
            <button className="btn btn-blue" disabled={working||!codeInput.trim()}>Verify <ArrowRight size={17}/></button>
           </form>
          </>}
-         <p className="help-text"><HelpCircle size={17}/> Missing or damaged QR? Ask a checkpoint staff member for manual verification. No team gets permanently stuck.</p>
+         <p className="help-text"><HelpCircle size={17}/> Missing QR? Ask checkpoint staff.</p>
         </div>:<div className="challenge-panel">
          <div className="challenge-unlocked"><CheckCircle2 size={18}/> CHECKPOINT VERIFIED · PUZZLE UNLOCKED</div>
          <span className="eyebrow">THE JOKER ASKS…</span>
@@ -374,16 +374,7 @@ export default function Home(){
         </div>}
        </div>}
       </div>
-      <aside className="game-sidebar">
-       <div className="joker-says"><div className="speech-icon">J<span>★</span></div><span className="eyebrow">A WORD FROM THE JOKER</span>
-        <h3>“{game.stage?.checkpointVerified?'You found my checkpoint. But can you solve my puzzle?':'Ah, a fresh contender. Every card hides a little secret.'}”</h3>
-        <span className="joker-sign">— THE JOKER</span></div>
-       <div className="side-hint"><span className="eyebrow dark-kicker">STUCK ON A CLUE?</span><h3>NEED A LITTLE NUDGE?</h3>
-        {hint?<p className="revealed-hint">{hint}</p>:<p>Even the sharpest minds sometimes need a hint from the deck.</p>}
-        <button className="btn btn-outline full" onClick={()=>void showHint()} disabled={!game.stage}><Sparkles size={18}/>{hint?'Read the hint again':'Reveal a hint'}</button>
-       </div>
-       <button className="text-link logout-link" onClick={()=>void logout()}><LogOut size={15}/> Leave this device / switch team</button>
-      </aside>
+      <button className="text-link logout-link" onClick={()=>void logout()}><LogOut size={15}/> Switch team / leave device</button>
      </div>
     </div>}
    </div>
@@ -406,7 +397,7 @@ export default function Home(){
         <p>No teams to rank yet. Be the first to make your mark!</p>
         <button className="hunt-button hunt-yellow" onClick={joinHunt}>{game && !newCode ? 'CONTINUE MY HUNT' : 'JOIN THE HUNT'} <ArrowRight size={17} aria-hidden/></button>
        </div></td></tr>
-       : ranks.slice(currentRankPage*5,currentRankPage*5+5).map(row => <tr key={row.rank} className={row.rank<=3?'rank-podium rank-place-'+row.rank:undefined}>
+       : ranks.slice(currentRankPage*rankPageSize,currentRankPage*rankPageSize+rankPageSize).map(row => <tr key={row.rank} className={row.rank<=3?'rank-podium rank-place-'+row.rank:undefined}>
         <td><span className={'hunt-rank-badge' + (row.rank===1 ? ' rank-first' : '')}>{pads(row.rank)}</span></td>
         <td className="hunt-rank-name"><span title={row.name}>{row.name}</span></td>
         <td className="hunt-rank-number">{row.stages} / {row.total}</td>

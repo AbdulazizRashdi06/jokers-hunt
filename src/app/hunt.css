@@ -726,3 +726,130 @@ button.team-admin-card { text-align: left; }
 }
 
 @media (min-width: 950px) { .rank-hero h1 em br { display: none; } }
+/* Single-screen player views. */
+.hunt-main-leaderboard, .hunt-app .hunt-main-game { display:flex; flex-direction:column; overflow:hidden; }
+.hunt-main-leaderboard .hunt-rankings, .hunt-app .hunt-main-game .game-page { flex:1; min-height:0; height:100%; }
+.hunt-main-leaderboard .hunt-rankings { min-height:0; }
+.hunt-main-leaderboard .rank-frame { height:100%; min-height:0; padding-block:10px; }
+.hunt-main-leaderboard .rank-hero { min-height:0; flex:none; }
+.hunt-main-leaderboard .rank-hero h1 { font-size:clamp(28px,6dvh,56px); }
+.hunt-main-leaderboard .rank-trophy-scene { max-width:clamp(90px,17dvh,150px); }
+.hunt-main-leaderboard .rank-intro { margin:7px 0 10px; font-size:14px; }
+.hunt-main-leaderboard .rank-table td { height:clamp(36px,5.6dvh,49px); }
+.hunt-main-leaderboard .rank-table th { padding-block:8px; }
+.hunt-main-leaderboard .rank-footnote { margin-top:9px; }
+.hunt-main-leaderboard .rank-deck-decoration { min-height:0; max-height:160px; margin-top:8px; }
+.hunt-main-leaderboard .rank-mini-card { bottom:3px; height:calc(100% - 12px); max-height:135px; width:auto; aspect-ratio:150/218; }
+.hunt-main-leaderboard .rank-scatter { font-size:clamp(13px,3dvh,26px); }
+.hunt-app .hunt-main-game .game-page { padding:10px 0; }
+.hunt-app .hunt-main-game .game-page .layout-wide { height:100%; }
+.hunt-app .hunt-main-game .dashboard { height:100%; display:flex; flex-direction:column; gap:8px; }
+.hunt-app .hunt-main-game .dashboard-header { flex-direction:row; align-items:center; gap:10px; margin:0; flex:none; }
+.hunt-app .hunt-main-game .dashboard-header .eyebrow { font-size:9px; }
+.hunt-app .hunt-main-game .dashboard-header h1 { font-size:clamp(20px,3.5dvh,36px); letter-spacing:-.04em; margin:3px 0; max-width:50vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hunt-app .hunt-main-game .game-timer { min-width:0; padding:8px 10px; gap:7px; }
+.hunt-app .hunt-main-game .game-timer small { font-size:8px; margin-bottom:2px; }
+.hunt-app .hunt-main-game .game-timer strong { font-size:18px; }
+.hunt-app .hunt-main-game .dashboard-grid { flex:1; min-height:0; display:flex; flex-direction:column; gap:4px; }
+.hunt-app .hunt-main-game .dashboard-main { flex:1; min-height:0; gap:8px; width:100%; }
+.hunt-app .hunt-main-game .collection-panel { padding:8px 12px; flex:none; }
+.hunt-app .hunt-main-game .collection-header h2, .hunt-app .hunt-main-game .collection-header .eyebrow { display:none; }
+.hunt-app .hunt-main-game .collection-header { justify-content:flex-end; }
+.hunt-app .hunt-main-game .completion-count { font-size:10px; }
+.hunt-app .hunt-main-game .progress-track { margin:4px 0 7px; height:4px; }
+.hunt-app .hunt-main-game .cards-row { display:flex; justify-content:space-evenly; gap:8px; margin:0; overflow-x:auto; }
+.hunt-app .hunt-main-game .card-slot { flex:none; width:clamp(30px,5dvh,52px); }
+.hunt-app .hunt-main-game .collectible { width:100%; }
+.hunt-app .hunt-main-game .card-slot>span { display:none; }
+.hunt-app .hunt-main-game .card-back .back-emblem { font-size:18px; }
+.hunt-app .hunt-main-game .card-back .back-emblem span { font-size:6px; }
+.hunt-app .hunt-main-game .corner-small, .hunt-app .hunt-main-game .card-rank { font-size:10px; }
+.hunt-app .hunt-main-game .card-suit { font-size:24px; }
+.hunt-app .hunt-main-game .stage-panel, .hunt-app .hunt-main-game .start-panel { flex:1; min-height:0; }
+.hunt-app .hunt-main-game .stage-panel { display:flex; flex-direction:column; }
+.hunt-app .hunt-main-game .stage-head { padding:8px 12px; gap:9px; }
+.hunt-app .hunt-main-game .stage-head h2 { font-size:clamp(16px,2.5dvh,24px); margin:3px 0 0; }
+.hunt-app .hunt-main-game .stage-number { font-size:24px; min-width:28px; }
+.hunt-app .hunt-main-game .stage-suit { font-size:30px; }
+.hunt-app .hunt-main-game .location-line { margin:6px 12px; font-size:13px; }
+.hunt-app .hunt-main-game .checkpoint-area, .hunt-app .hunt-main-game .challenge-panel { padding:8px 12px; flex:1; min-height:0; overflow:auto; }
+.hunt-app .hunt-main-game .checkpoint-title h3 { font-size:14px; margin:0 0 3px; }
+.hunt-app .hunt-main-game .checkpoint-title p { font-size:12px; line-height:1.3; }
+.hunt-app .hunt-main-game .scan-actions { flex-direction:row; margin:8px 0; gap:6px; }
+.hunt-app .hunt-main-game .scan-actions .btn { flex:1; padding:7px; font-size:12px; min-height:44px; }
+.hunt-app .hunt-main-game .or-divider { margin:5px 0; font-size:9px; }
+.hunt-app .hunt-main-game .code-row, .hunt-app .hunt-main-game .answer-row { flex-direction:row; gap:6px; margin:6px 0; }
+.hunt-app .hunt-main-game .code-row input, .hunt-app .hunt-main-game .answer-row input { padding:8px; width:0; }
+.hunt-app .hunt-main-game .code-row .btn, .hunt-app .hunt-main-game .answer-row .btn { width:auto; padding:8px; font-size:12px; }
+.hunt-app .hunt-main-game .help-text { font-size:11px; margin:5px 0 0; }
+.hunt-app .hunt-main-game .challenge-unlocked { font-size:10px; margin:0 0 5px; }
+.hunt-app .hunt-main-game .challenge-panel h3 { font-size:clamp(16px,2.4dvh,23px); line-height:1.35; margin:7px 0; }
+.hunt-app .hunt-main-game .logout-link { flex:none; align-self:center; min-height:32px; padding:3px; font-size:12px; }
+.hunt-app .hunt-main-game .start-panel { padding:15px; display:flex; flex-direction:column; justify-content:center; }
+.hunt-app .hunt-main-game .start-panel h2 { font-size:24px; }
+.hunt-app .hunt-main-game .paused-banner { padding:5px 9px; font-size:12px; margin:0; }
+.hunt-app .hunt-main-game .victory { height:100%; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
+.hunt-app .hunt-main-game .victory-star, .hunt-app .hunt-main-game .victory>.eyebrow, .hunt-app .hunt-main-game .victory-certificate { display:none; }
+.hunt-app .hunt-main-game .victory h1 { font-size:clamp(24px,5dvh,48px); margin:0; }
+.hunt-app .hunt-main-game .victory p { font-size:13px; margin:0; }
+.hunt-app .hunt-main-game .final-reveal-wrap { margin:0; transform:scale(.75); height:220px; }
+.hunt-app .hunt-main-game .victory-actions { margin:0; gap:8px; }
+@media print { .hunt-app .hunt-main-game .victory-certificate { display:block!important; } }
+/* Organizer-only venue display. */
+.screen-open-link { display:inline-flex; align-items:center; gap:6px; padding:10px; font-weight:700; }
+.live-screen, .screen-gate { font-family:var(--body); background:#0d2034; color:var(--cream); min-height:100dvh; }
+.live-screen { height:100dvh; overflow:hidden; padding:clamp(16px,3vw,46px); display:flex; flex-direction:column; gap:clamp(12px,2dvh,26px); background-image:radial-gradient(ellipse at 88% 10%,#b9446f35,transparent 42%),linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px); background-size:auto,48px 48px,48px 48px; }
+.screen-header, .screen-brand, .screen-controls, .screen-title, .screen-footer, .screen-footer>div { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.screen-brand { font-weight:900; letter-spacing:.08em; font-size:clamp(12px,1.5vw,22px); }
+.screen-controls button, .screen-controls a { display:inline-flex; align-items:center; gap:8px; min-height:44px; min-width:44px; justify-content:center; border:1px solid #fff7e440; border-radius:6px; padding:8px; }
+.screen-controls { opacity:.45; transition:opacity .2s; }
+.screen-controls:hover, .screen-controls:focus-within { opacity:1; }
+.screen-title { flex:none; }
+.screen-title h1 { font:400 clamp(24px,4vw,62px)/.98 var(--display); letter-spacing:-.04em; margin:8px 0 0; }
+.screen-title h1 em { color:var(--yellow); font-style:normal; }
+.screen-live { display:flex; gap:8px; align-items:center; font-size:12px; letter-spacing:.13em; font-weight:900; color:#a8d7df; margin:0; }
+.screen-live i { width:8px; height:8px; border-radius:50%; background:#80d8b0; box-shadow:0 0 16px #80d8b080; }
+.screen-prize { width:clamp(105px,13vw,195px); }
+.screen-standings { flex:1; min-height:0; }
+.screen-table-heading, .screen-row { display:grid; grid-template-columns:64px minmax(0,1fr) minmax(130px,.55fr) minmax(100px,.35fr); gap:20px; align-items:center; }
+.screen-table-heading { padding:0 18px 12px; color:#9aadc2; font-size:11px; letter-spacing:.1em; font-weight:800; }
+.screen-rows { height:calc(100% - 30px); display:flex; flex-direction:column; gap:8px; animation:page-arrive .4s ease; }
+.screen-row { flex:1; min-height:0; max-height:100px; border:1px solid #ffffff20; background:#ffffff07; padding:8px 18px; border-radius:8px; }
+.screen-rank { font:400 clamp(18px,2.5vw,36px) var(--display); color:#9aadc2; }
+.screen-row strong { display:flex; gap:12px; align-items:center; font-size:clamp(17px,2.2vw,34px); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.screen-row strong svg { flex:none; color:var(--yellow); }
+.screen-leading { border-color:#ffd52f80; background:linear-gradient(100deg,#ffd52f20,#ffd52f05); }
+.screen-leading .screen-rank { color:var(--yellow); }
+.screen-progress { display:flex; align-items:center; gap:12px; font-size:18px; font-weight:800; font-variant-numeric:tabular-nums; }
+.screen-track { height:8px; background:#ffffff15; border-radius:6px; flex:1; overflow:hidden; }
+.screen-track i { display:block; height:100%; background:var(--pink); border-radius:6px; transition:width .5s; }
+.screen-leading .screen-track i { background:var(--yellow); }
+.screen-time { font-size:clamp(15px,1.6vw,25px); font-weight:700; font-variant-numeric:tabular-nums; color:#b7c9db; }
+.screen-footer { flex:none; font-size:12px; color:#9aadc2; }
+.screen-footer button { min-height:36px; min-width:36px; }
+.screen-footer>span:last-child { font-size:22px; color:var(--pink); letter-spacing:10px; }
+.screen-empty, .screen-gate { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; flex:1; text-align:center; }
+@media (max-width:650px) { .screen-controls span { display:none; } .screen-table-heading,.screen-row { grid-template-columns:30px minmax(0,1fr) 65px 60px; gap:8px; padding-inline:8px; } .screen-progress { font-size:14px; } .screen-track { display:none; } .screen-table-heading { font-size:8px; } .screen-footer>span:last-child { display:none; } .screen-brand .hunt-mark { width:32px; height:32px; } }
+@media (prefers-reduced-motion:reduce) { .screen-rows, .screen-progress i { animation:none; transition:none; } }
+
+.hunt-app .hunt-main-game .dashboard-header .eyebrow, .hunt-app .hunt-main-game .game-timer small { display:none; }
+.hunt-app .hunt-main-game .checkpoint-title p { display:none; }
+.hunt-app .hunt-main-game .checkpoint-title>svg { width:22px; height:22px; }
+.hunt-app .hunt-main-game .checkpoint-title h3 { margin:0; }
+.hunt-app .hunt-main-game .code-row .btn, .hunt-app .hunt-main-game .answer-row .btn { white-space:nowrap; min-height:44px; gap:4px; }
+@media (max-height:700px) {
+ .hunt-app .hunt-main-game .collection-panel { padding:5px 9px; display:grid; grid-template-columns:90px 1fr; align-items:center; gap:4px 9px; }
+ .hunt-app .hunt-main-game .collection-header { grid-column:1; grid-row:1; margin:0; }
+ .hunt-app .hunt-main-game .progress-track { grid-column:1; grid-row:2; width:100%; margin:0; }
+ .hunt-app .hunt-main-game .cards-row { grid-column:2; grid-row:1 / 3; padding-bottom:3px; }
+ .hunt-app .hunt-main-game .card-slot { width:26px; }
+ .hunt-app .hunt-main-game .stage-head .eyebrow { display:none; }
+ .hunt-app .hunt-main-game .stage-head { padding:6px 10px; }
+ .hunt-app .hunt-main-game .location-line { margin:4px 10px; }
+ .hunt-app .hunt-main-game .checkpoint-area:has(.scan-actions) .checkpoint-title,
+ .hunt-app .hunt-main-game .checkpoint-area:has(.scan-actions) .or-divider,
+ .hunt-app .hunt-main-game .checkpoint-area:has(.scan-actions) .help-text { display:none; }
+ .hunt-app .hunt-main-game .scan-actions { margin:0 0 7px; }
+}
+
+.hunt-app .hunt-main-game .final-reveal-wrap { height:clamp(130px,29dvh,220px); transform:scale(.65); }
