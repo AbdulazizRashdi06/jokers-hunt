@@ -334,4 +334,9 @@ team names, collected cards and finish times only. Both the server-rendered page
 and `/api/admin/leaderboard` require the organizer session. An expired or revoked
 session hides the display on its next refresh. Public leaderboard and My Hunt
 use compact layouts; the public standings paginate on smaller screens. The player
-clue and hint are available in the mission card, alongside a checkpoint/puzzle tab.
+clue is available in the mission card, alongside a checkpoint/puzzle tab. Hints are disabled, including at the API.
+
+Checkpoint printing produces one full-size A4 poster per copy. The print layout
+hides dashboard controls and keeps decorative cards outside the QR quiet zone.
+The final Joker can be flipped by tapping it; the result shows the recorded
+leaderboard time and current placing (which can change as other teams finish).

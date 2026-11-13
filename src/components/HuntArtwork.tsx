@@ -119,3 +119,13 @@ export function LeaderboardArtwork(){
   <path d="m121 35 5 9m35-10-4 9m-14-18v13M28 203l9-4m211-82 9 3" stroke="#146fa9" strokeWidth="3" strokeLinecap="round"/>
  </svg>;
 }
+
+export function CollectionCard({rank,suit,complete,active}:{rank:number;suit:string;complete:boolean;active:boolean}){
+ const pattern=useId();const ink=complete?'#244f70':active?'#a13d62':'#fff3d5';
+ return <div className={'collection-tile '+(complete?'tile-collected':active?'tile-active':'tile-locked')} aria-hidden="true"><svg viewBox="0 0 100 144">
+  <defs><pattern id={pattern} width="12" height="12" patternUnits="userSpaceOnUse"><path d="m6 0 6 6-6 6-6-6Z" fill="none" stroke="#fff3d5" strokeWidth=".6" opacity=".2"/></pattern></defs>
+  <rect x="2" y="2" width="96" height="140" rx="7" fill={complete?'#fffaf0':active?'#f8e9e9':'#18394e'} stroke={active?'#a13d62':'#18394e'} strokeWidth="3"/>
+  <rect x="8" y="8" width="84" height="128" rx="3" fill={complete||active?'none':`url(#${pattern})`} stroke={ink} strokeWidth=".8" opacity=".8"/>
+  {complete||active?<><g fontFamily="Georgia,serif" fontSize="20" fontWeight="bold" fill={ink}><text x="15" y="31">{rank}</text><text x="15" y="46" fontSize="14">{suit}</text></g><g transform="rotate(180 50 72)" fontFamily="Georgia,serif" fontSize="20" fontWeight="bold" fill={ink}><text x="15" y="31">{rank}</text><text x="15" y="46" fontSize="14">{suit}</text></g><text x="50" y="89" textAnchor="middle" fontFamily="Georgia,serif" fontSize="43" fill={ink}>{suit}</text></>:<g stroke={ink} fill="none"><path d="m50 42 22 30-22 30-22-30Z" strokeWidth="1.2"/><path d="m50 50 16 22-16 22-16-22Z" strokeWidth=".7"/><circle cx="50" cy="72" r="7"/><path d="M42 26h16M42 118h16"/></g>}
+ </svg></div>;
+}

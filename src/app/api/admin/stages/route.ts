@@ -8,7 +8,7 @@ const base=z.object({
  suit:z.enum(['♠','♥','♦','♣','★']),
  locationLabel:z.string().trim().min(2).max(110),
  clue:z.string().trim().min(5).max(1200),
- hint:z.string().trim().min(3).max(600),
+ hint:z.string().trim().max(600).optional().default(''),
  question:z.string().trim().min(5).max(1200),
  answer:z.string().trim().max(150).optional(),
  staffOnly:z.boolean(),enabled:z.boolean(),

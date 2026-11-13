@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { captainPhoneSchema } from '@/lib/team-input';
 import QrScanner from '@/components/QrScanner';
-import { JokerArtwork, CourtArtwork, LeaderboardArtwork } from '@/components/HuntArtwork';
+import { JokerArtwork, CollectionCard, CourtArtwork, LeaderboardArtwork } from '@/components/HuntArtwork';
 import { HuntDialog,HuntHeader,HuntStory,HuntTabs,suits,type HuntOverlay,type HuntView } from '@/components/HuntIntro';
 
 type Stage={
@@ -35,18 +35,9 @@ async function send(url:string,body:unknown,method='POST'){
 function Card({suit,index,complete,active}:{
  suit:string;index:number;complete:boolean;active:boolean
 }){
- const mark=suit.endsWith('\uFE0E')?suit:suit+'\uFE0E';
- return <div className={`collectible ${complete?'collected':''} ${active?'active':''}`} aria-hidden>
-  <div className="collectible-inner">
-   <div className="card-face card-back"><span className="corner-small">J</span>
-    <span className="back-emblem">✦<br/><span>JOKER</span></span><span className="corner-small bottom">J</span>
-   </div>
-   <div className="card-face card-front"><span className="card-rank">{index+1}<small>{mark}</small></span>
-    <span className="card-suit">{mark}</span>
-    <span className="card-rank lower">{index+1}<small>{mark}</small></span></div>
-  </div>
- </div>;
+ return <CollectionCard rank={index+1} suit={suit.replace(/\uFE0E/g,'')} complete={complete} active={active}/>;
 }
+
 function Confetti(){return <div className="confetti-field" aria-hidden>
  {Array.from({length:48},(_,i)=><i key={i} style={{
   '--x':`${(i*37)%100}%`,'--delay':`${(i*13)%18/10}s`,
@@ -62,10 +53,11 @@ export default function Home(){
  [name,setName]=useState(''),[leader,setLeader]=useState(''),[captainPhone,setCaptainPhone]=useState(''),[memberName,setMemberName]=useState(''),[size,setSize]=useState(3),
  [accessInput,setAccessInput]=useState(''),[newCode,setNewCode]=useState(''),
  [working,setWorking]=useState(false),[notice,setNotice]=useState(''),
+ [victoryFlipped,setVictoryFlipped]=useState(false),
  [huntPanel,setHuntPanel]=useState<'clue'|'checkpoint'>('clue'),
  [scanning,setScanning]=useState(false),[codeInput,setCodeInput]=useState(''),
  [scanned,setScanned]=useState(''),[answer,setAnswer]=useState(''),
- [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now()),
+[clock,setClock]=useState(Date.now()),
  [overlay,setOverlay]=useState<HuntOverlay|null>(null),[formError,setFormError]=useState(''),
  [copied,setCopied]=useState(false),[rankPage,setRankPage]=useState(0),[rankPageSize,setRankPageSize]=useState(5);
  useEffect(()=>{const resize=()=>setRankPageSize(window.innerHeight<700?3:5);resize();window.addEventListener('resize',resize);return()=>window.removeEventListener('resize',resize);},[]);
@@ -130,7 +122,7 @@ export default function Home(){
    const st=qs.get('stage');if(st)sessionStorage.setItem('qr-stage',st);
    window.history.replaceState(null,'',window.location.pathname);}
  },[]);
- useEffect(()=>{setHint('');setAnswer('');setCodeInput('');setHuntPanel('clue');},[game?.stage?.id]);
+ useEffect(()=>{setAnswer('');setCodeInput('');setHuntPanel('clue');},[game?.stage?.id]);
  useEffect(()=>{if(scanned)setHuntPanel('checkpoint');},[scanned]);
  async function register(){
   setFormError('');
@@ -183,11 +175,6 @@ export default function Home(){
   }catch(e){setNotice((e as Error).message);}
   finally{setWorking(false);}
  }
- async function showHint(){
-  if(!game?.stage)return;
-  try{const v=await send('/api/hint',{stageId:game.stage.id});setHint(v.hint);}
-  catch(e){setNotice((e as Error).message);}
- }
  async function startHunt(){
   setWorking(true);setNotice('');
   try{await send('/api/team/start',{});await refresh();setNotice('The clock is ticking. Let the games begin!');}
@@ -225,6 +212,13 @@ export default function Home(){
   -game.pausedTotalSeconds+game.team.startedPauseSeconds
  ):'00:00:00';
  const complete=!!game&&!game.notStarted&&!game.stage&&game.total>0;
+ const result=ranks.find(row=>row.name===game?.team.name&&row.finished);
+ useEffect(()=>{
+  if(!complete||view!=='game')return;
+  let stopped=false;
+  const load=async()=>{try{const r=await fetch('/api/leaderboard',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(!stopped)setRanks(d.rows||[]);}catch{}};
+  void load();const t=setInterval(load,10000);return()=>{stopped=true;clearInterval(t);};
+ },[complete,view]);
  const fill=game&&game.total?Math.round((game.completed.length/game.total)*100):0;
  const qrStageMatch=!game?.stage||!sessionStorageSafe('qr-stage')||sessionStorageSafe('qr-stage')===game.stage.id;
  const collection=useMemo(()=>Array.from({length:game?.total||5},(_,i)=>{
@@ -292,31 +286,16 @@ export default function Home(){
    <div className="layout-wide">
     {!game?<div className="empty-state"><span>♠</span><h2>YOUR HAND IS EMPTY.</h2><p>You need a team before the cards can be dealt.</p>
       <button className="btn btn-yellow" onClick={()=>setView('register')}>Register or rejoin <ArrowRight/></button></div>
-    :complete?<div className="victory">
-      <Confetti/><div className="victory-star">★</div>
-      <span className="eyebrow">♠ ♥ ♦ ♣ ★ · ALL CARDS COLLECTED</span>
-      <h1>YOU&apos;VE OUTSMARTED<br/><em>THE JOKER!</em></h1>
-      <p>The Joker tips his hat. <b>{game.team.name}</b>, the deck never stood a chance.</p>
-      <div className="final-reveal-wrap" aria-label="The Joker has been revealed">
-       <div className="final-reveal-card">
-        <div className="final-face final-back"><span>J</span><strong>✦</strong><small>THE FINAL CARD</small></div>
-        <div className="final-face final-front"><div className="final-art">
-         <JokerArtwork/>
-        </div><b>THE JOKER</b><small>♠ ♥ ♦ ♣ ★</small></div>
-       </div>
-      </div>
-      <div className="victory-certificate" id="certificate">
-       <div className="certificate-corners"><span>J ♠</span><span>★</span></div>
-       <div className="victory-medal">🃏</div>
-       <span className="certificate-kicker">OFFICIAL JOKER&apos;S HUNT · 08 DEC 2026</span>
-       <h2>MASTER OF THE DECK</h2><div className="certificate-team">{game.team.name}</div>
-       <p>Has collected all {game.total} mystery cards and defeated the Joker.</p>
-       <span className="certificate-footer">GUvoices × German Festival · Debate Club</span>
-      </div>
-      <div className="victory-actions">
-       <button className="btn btn-yellow" onClick={()=>window.print()}>Print my victory card <ArrowUpRight size={18}/></button>
-       <button className="btn btn-outline" onClick={()=>setView('leaderboard')}>See leaderboard <Trophy size={18}/></button>
-      </div>
+    :complete?<div className="victory-reworked">
+      <div className="victory-heading"><p>THE FINAL CARD IS YOURS</p><h1>YOU OUTSMARTED<br/><em>THE JOKER.</em></h1></div>
+      <button className="victory-joker" aria-label="Flip your winning Joker card" aria-pressed={victoryFlipped} onClick={()=>setVictoryFlipped(v=>!v)}>
+       <span className="victory-joker-inner"><span className="victory-joker-front"><JokerArtwork/></span><span className="victory-joker-back"><b>HUNT<br/>COMPLETE.</b><strong>{game.team.name}</strong><small>THE JOKER CONCEDES.</small></span></span>
+      </button>
+      <p className="victory-flip-prompt">Tap the Joker to turn your final card.</p>
+      <div className="victory-result"><div><span>YOU FINISHED IN</span><strong>{result?.elapsedSeconds!=null?duration(result.elapsedSeconds):'Checking time…'}</strong></div><div><span>CURRENT PLACE</span><strong>{result?'#'+result.rank:'Checking…'}</strong></div></div>
+      <p className="victory-team-name">{game.team.name}</p>
+      <div className="victory-menu"><button className="btn btn-yellow" onClick={()=>setView('leaderboard')}>Leaderboard</button><button className="btn btn-outline" onClick={()=>window.print()}>Print victory card</button></div>
+      <div className="victory-certificate" id="certificate"><span className="certificate-kicker">THE JOKER&apos;S HUNT</span><h2>MASTER OF THE DECK</h2><div className="certificate-team">{game.team.name}</div><p>Collected all {game.total} cards and outsmarted the Joker.</p><p>Time: {result?.elapsedSeconds!=null?duration(result.elapsedSeconds):'Pending'} · Current place: {result?'#'+result.rank:'Pending'}</p></div>
     </div>:<div className="dashboard">
      <div className="dashboard-header">
       <div><span className="eyebrow">WELCOME TO THE GAME,</span>
@@ -351,8 +330,8 @@ export default function Home(){
          <button aria-pressed={huntPanel==='clue'} onClick={()=>setHuntPanel('clue')}><Eye size={15}/> The clue</button>
          <button aria-pressed={huntPanel==='checkpoint'} onClick={()=>setHuntPanel('checkpoint')}><ScanLine size={15}/>{game.stage.checkpointVerified?'The puzzle':'Checkpoint'}</button>
         </div>
-        {huntPanel==='clue'&&<div className="mission-clue"><div className="clue-box"><span><Eye size={17}/> {hint?'THE JOKER’S HINT':'THE JOKER’S CLUE'}</span><p>“{hint||game.stage.clue}”</p></div>
-         <div className="mission-clue-actions"><button className="btn btn-outline" onClick={()=>{if(hint)setHint('');else void showHint();}}><Sparkles size={16}/>{hint?'Back to clue':'Need a hint?'}</button><button className="btn btn-blue" onClick={()=>setHuntPanel('checkpoint')}> {game.stage.checkpointVerified?'Open puzzle':'At the checkpoint?'} <ArrowRight size={16}/></button></div>
+        {huntPanel==='clue'&&<div className="mission-clue"><div className="clue-box"><span><Eye size={17}/> THE JOKER&apos;S CLUE</span><p>“{game.stage.clue}”</p></div>
+         <div className="mission-clue-actions"><button className="btn btn-blue" onClick={()=>setHuntPanel('checkpoint')}>{game.stage.checkpointVerified?'Open puzzle':'At the checkpoint?'} <ArrowRight size={16}/></button></div>
         </div>}
         <div className="location-line"><Flag size={19}/><span>{game.stage.locationLabel}</span></div>
         {huntPanel==='checkpoint'&&(!game.stage.checkpointVerified?<div className="checkpoint-area">

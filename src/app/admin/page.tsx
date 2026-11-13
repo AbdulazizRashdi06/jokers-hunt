@@ -6,6 +6,7 @@ import {
  Lock,LogOut,Pause,Play,Plus,Printer,RefreshCw,Save,ShieldCheck,
  Sparkles,Trash2,Users,X,Check,Trophy,RotateCw
 } from 'lucide-react';
+import CheckpointPoster from '@/components/CheckpointPoster';
 import DeleteTeamDialog from '@/components/DeleteTeamDialog';
 import OrganizerFields from '@/components/OrganizerFields';
 import { HuntMark } from '@/components/HuntArtwork';
@@ -250,9 +251,7 @@ export default function AdminPage(){
        <button className="btn btn-outline" onClick={()=>void stageAction('rotateBackup',chosen.id)}><RotateCw size={16}/> Rotate backup</button>
       </div></div>
      <p className="admin-warning">Rotating a code invalidates ALL older printed copies of that code. Reprint after any rotation.</p>
-     <div className="qr-preview">{qrData?<img src={qrData} alt="Printable checkpoint QR"/>:<p>Generating QR…</p>}
-      <div><span>CHECKPOINT {String(chosen.position).padStart(2,'0')}</span><b>{chosen.title}</b>
-       <p>SCAN · SOLVE · COLLECT</p><strong>BACKUP: {chosen.backupCode}</strong></div></div>
+     {qrData?<CheckpointPoster stage={chosen} qr={qrData}/>:<p>Preparing checkpoint poster…</p>}
      <button className="btn btn-blue" disabled={!qrData} onClick={()=>{
       setPrinting(true);setTimeout(()=>window.print(),250);
      }}><Printer size={19}/> Print {copies} identical {copies===1?'copy':'copies'}</button>
@@ -274,7 +273,7 @@ export default function AdminPage(){
       <label>PHYSICAL LOCATION <input required value={editing.locationLabel||''} onChange={e=>setEditing({...editing,locationLabel:e.target.value})}/></label>
      </div>
      <label>PLAYER&apos;S CLUE <textarea required rows={3} value={editing.clue||''} onChange={e=>setEditing({...editing,clue:e.target.value})}/></label>
-     <label>HINT <textarea required rows={2} value={editing.hint||''} onChange={e=>setEditing({...editing,hint:e.target.value})}/></label>
+
      <label>PUZZLE / CHALLENGE <textarea required rows={3} value={editing.question||''} onChange={e=>setEditing({...editing,question:e.target.value})}/></label>
      <label>CORRECT ANSWER <input required={!editing.id} value={editing.answer||''} onChange={e=>setEditing({...editing,answer:e.target.value})}/>
       <small>Stored securely on the server; not sent to players. Answers ignore casing and extra spaces.</small></label>
@@ -287,15 +286,7 @@ export default function AdminPage(){
    </div>
   </div>}
   {printing&&chosen&&qrData&&<div className="print-only-sheet">
-   {Array.from({length:copies},(_,i)=><div className="printed-checkpoint" key={i}>
-    <div className="print-brand">✦ THE JOKER&apos;S HUNT</div>
-    <h2>CHECKPOINT {String(chosen.position).padStart(2,'0')}</h2>
-    <h3>{chosen.title}</h3>
-    <img src={qrData} alt={`Stage ${chosen.position} QR code`}/>
-    <p>SCAN THE CODE · SOLVE THE PUZZLE · COLLECT YOUR CARD</p>
-    <div className="printed-backup">CAN&apos;T SCAN? BACKUP CODE: <b>{chosen.backupCode}</b></div>
-    <small>GUvoices × German Festival · Debate Club · 08 DEC 2026</small>
-   </div>)}
+   {Array.from({length:copies},(_,i)=><div className="printed-checkpoint" key={i}><CheckpointPoster stage={chosen} qr={qrData}/></div>)}
    <button className="print-hide-close" onClick={()=>setPrinting(false)}>Close print sheet</button>
   </div>}
  </div>;

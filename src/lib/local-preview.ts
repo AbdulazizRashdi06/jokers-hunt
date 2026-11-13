@@ -89,7 +89,7 @@ async function run(r:NextRequest):Promise<NextResponse>{
   else if(['checkpoint','challenge','hint'].includes(route)){
    const t=teamAuth(),stage=current(t);if(!t.startedAt||!stage||stage.id!==body.stageId)fail(409,'Start your hunt and use your current stage.');
    const v=stage!,p=progress(t,v.id);
-   if(route==='hint'){p.hint=true;response=json({hint:v.hint});}
+   if(route==='hint'){fail(404,'Hints are not available in this hunt.');}
    else {active();if(route==='checkpoint'){
     if(v.staffOnly)fail(403,'This checkpoint needs staff verification.');let value=text('value',1,300);try{value=new URL(value).searchParams.get('checkpoint')||value;}catch{}
     if(!equal(value.toUpperCase(),(body.method==='qr'?v.qrToken:v.backupCode).toUpperCase()))fail(400,'Incorrect checkpoint code.');p.verified=true;
@@ -118,7 +118,7 @@ async function run(r:NextRequest):Promise<NextResponse>{
     if(r.method==='POST'){
      const verb=text('action');
      if(verb==='create'||verb==='update'){
-      const v=z.object({title:z.string().min(2).max(65),suit:z.enum(['♠','♥','♦','♣','★']),locationLabel:z.string().min(2).max(110),clue:z.string().min(5).max(1200),hint:z.string().min(3).max(600),question:z.string().min(5).max(1200),answer:z.string().max(150).optional(),staffOnly:z.boolean(),enabled:z.boolean(),position:z.number().int().min(1).max(500)}).parse(body.stage);
+      const v=z.object({title:z.string().min(2).max(65),suit:z.enum(['♠','♥','♦','♣','★']),locationLabel:z.string().min(2).max(110),clue:z.string().min(5).max(1200),hint:z.string().max(600).optional().default(''),question:z.string().min(5).max(1200),answer:z.string().max(150).optional(),staffOnly:z.boolean(),enabled:z.boolean(),position:z.number().int().min(1).max(500)}).parse(body.stage);
       if(verb==='create'){if(!v.answer)fail(400,'Answer required.');s.stages.push({...v,id:randomUUID(),answer:v.answer!,qrToken:randomBytes(24).toString('base64url'),backupCode:randomBytes(4).toString('hex').toUpperCase()});}
       else{const old=s.stages.find(v=>v.id===body.id);if(!old)fail(404,'Stage not found.');Object.assign(old!,v,{answer:v.answer||old!.answer});}
      }else if(verb==='reorder'){const ids=z.array(z.string()).parse(body.ids);if(ids.length!==s.stages.length||new Set(ids).size!==ids.length||s.stages.some(v=>!ids.includes(v.id)))fail(400,'Include every stage once.');ids.forEach((id,i)=>s.stages.find(v=>v.id===id)!.position=i+1);}

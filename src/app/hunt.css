@@ -948,3 +948,127 @@ button.team-admin-card { text-align: left; }
 
 .hunt-app .hunt-main-game .collection-header { justify-content:space-between; gap:10px; }
 .hunt-app .hunt-main-game .collection-header h2 { font-size:13px; }
+/* Independent mini cards and pips, not the cover's repeated card fan. */
+.screen-scattered-art { position:relative; flex:none; width:clamp(200px,32vw,470px); height:clamp(90px,13dvh,145px); }
+.screen-mini-card { position:absolute; width:58px; height:82px; padding:6px; background:var(--cream); color:var(--deep); border:2px solid #15304b; border-radius:5px; box-shadow:3px 4px 0 #0003; font:800 17px Georgia,serif; }
+.screen-mini-card:after { content:''; position:absolute; inset:4px; border:1px solid currentColor; opacity:.3; border-radius:2px; }
+.screen-mini-card b { position:relative; z-index:1; font:inherit; }
+.screen-mini-card i { display:block; font-style:normal; font-size:34px; text-align:center; }
+.card-ace { left:9%; top:4px; rotate:-14deg; }
+.card-three { left:46%; top:25px; rotate:18deg; color:#a13d62; }
+.card-three i { font-size:21px; line-height:.8; max-width:26px; margin:0 auto; }
+.card-heart { right:0; top:-5px; rotate:-8deg; color:#a13d62; }
+.scatter-pip { position:absolute; font-family:Georgia,serif; line-height:1; }
+.scatter-pip.spade { left:32%; bottom:4px; font-size:21px; color:#a8bcd1; rotate:13deg; }
+.scatter-pip.diamond { right:23%; top:-2px; font-size:18px; color:var(--pink); rotate:-15deg; }
+.scatter-pip.club { right:9%; bottom:-3px; font-size:23px; color:#a8bcd1; }
+.scatter-pip.star { left:0; bottom:5px; font-size:26px; color:var(--yellow); }
+.scatter-dash { position:absolute; width:9px; height:3px; background:var(--yellow); }
+.dash-one { left:32%; top:4px; rotate:35deg; }.dash-two { right:24%; bottom:6px; rotate:-25deg; background:var(--pink); }
+.screen-summary { display:grid; grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) auto; gap:24px; padding:10px 18px; }
+.screen-stat { display:grid; grid-template-columns:48px 1fr; align-items:center; gap:12px; min-height:32px; }
+.screen-summary .screen-stat b { margin:0; text-align:right; font-size:26px; line-height:1; }
+.screen-stat>span { line-height:1.25; }
+.screen-top-label { margin:0; justify-self:end; }
+/* Detailed collection faces, with a quieter ornamental card back. */
+.collection-tile { width:100%; aspect-ratio:100/144; filter:drop-shadow(2px 3px 0 #17344b33); transition:transform .25s; }
+.collection-tile svg { display:block; width:100%; height:100%; }
+.tile-active { transform:translateY(-2px); filter:drop-shadow(0 0 3px #b9446f55); }
+.hunt-app .hunt-main-game .cards-row { padding:5px 2px 5px; }
+.hunt-app .hunt-main-game .mission-clue-actions { justify-content:flex-end; }
+/* The winning card has its own layout; actions never overlay the artwork. */
+.victory-reworked { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(5px,1.1dvh,12px); text-align:center; }
+.victory-heading p { margin:0 0 5px; font-size:10px; font-weight:800; letter-spacing:.12em; color:var(--blue); }
+.victory-heading h1 { margin:0; font:400 clamp(24px,4.7dvh,48px)/.98 var(--display); letter-spacing:-.04em; }
+.victory-heading em { color:var(--pink-text); font-style:normal; }
+.victory-joker { display:block; flex:none; padding:0; height:clamp(150px,36dvh,365px); aspect-ratio:150/218; border:0; background:none; perspective:1100px; border-radius:8px; }
+.victory-joker-inner { position:relative; display:block; width:100%; height:100%; transform-style:preserve-3d; transition:transform .65s cubic-bezier(.2,.8,.2,1); }
+.victory-joker[aria-pressed='true'] .victory-joker-inner { transform:rotateY(180deg); }
+.victory-joker-front,.victory-joker-back { position:absolute; inset:0; display:block; backface-visibility:hidden; border-radius:8px; box-shadow:5px 7px 0 #17344b30; }
+.victory-joker-back { transform:rotateY(180deg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:15px; background:repeating-linear-gradient(45deg,#ffffff08 0 1px,transparent 1px 9px),var(--deep); color:var(--cream); border:4px double var(--cream); }
+.victory-joker-back b { color:var(--yellow); font:400 clamp(18px,3.6dvh,36px)/1 var(--display); }
+.victory-joker-back strong { font-size:clamp(12px,2dvh,20px); overflow-wrap:anywhere; }
+.victory-joker-back small { font-size:8px; letter-spacing:.1em; }
+.victory-flip-prompt { font-size:11px; color:var(--muted); margin:0; }
+.victory-result { display:grid; grid-template-columns:1fr 1fr; width:min(100%,440px); padding:9px 12px; border:1px solid #17344b30; border-radius:5px; background:var(--card); }
+.victory-result>div { display:grid; gap:3px; }
+.victory-result>div+div { border-left:1px solid #17344b30; }
+.victory-result span { font-size:9px; font-weight:800; letter-spacing:.08em; color:var(--muted); }
+.victory-result strong { font-size:clamp(18px,3dvh,28px); font-variant-numeric:tabular-nums; }
+.victory-team-name { margin:0; max-width:90%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; font-weight:800; font-size:14px; }
+.victory-menu { display:flex; justify-content:center; gap:10px; flex:none; }
+.victory-menu .btn { min-height:40px; padding:8px 12px; font-size:12px; }
+.victory-reworked .victory-certificate { display:none; }
+/* A matching screen preview and print-ready A4 checkpoint poster. */
+.checkpoint-poster { position:relative; isolation:isolate; overflow:hidden; width:min(100%,500px); aspect-ratio:210/297; margin:24px auto; background:#fffaf0; color:#152d44; border:3px solid #152d44; box-shadow:8px 8px 0 #152d4425; padding:8% 7%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; text-align:center; }
+.poster-background { position:absolute; inset:0; z-index:-1; pointer-events:none; }
+.poster-background:after { content:''; position:absolute; inset:12px; border:1px solid #b9446f66; }
+.poster-court { position:absolute; width:38%; aspect-ratio:150/218; opacity:.14; }
+.poster-court svg { width:100%; height:100%; }
+.poster-court-left { left:-10%; top:4%; rotate:-22deg; }
+.poster-court-right { right:-10%; bottom:4%; rotate:23deg; }
+.poster-pip { position:absolute; right:8%; top:5%; color:#b9446f; font:700 35px Georgia,serif; opacity:.2; }
+.checkpoint-poster header { width:100%; position:relative; }
+.checkpoint-poster header>span { display:block; font-size:11px; font-weight:900; letter-spacing:.12em; margin-bottom:14px; }
+.checkpoint-poster header>b { display:inline-block; padding:7px 14px; background:#ffd52f; border:1px solid #152d44; font-size:14px; font-weight:900; letter-spacing:.08em; }
+.checkpoint-poster header h2 { font:400 clamp(20px,3vw,32px)/1.1 var(--display); margin:12px 0 5px; overflow-wrap:anywhere; }
+.checkpoint-poster header p { font-size:13px; margin:0; }
+.poster-qr { flex:none; width:76%; aspect-ratio:1; background:#fff; border:2px solid #152d44; border-radius:8px; padding:12px; margin:15px 0; }
+.poster-qr img { display:block; width:100%; height:100%; object-fit:contain; }
+.poster-instructions b { font-size:15px; letter-spacing:.04em; }
+.poster-instructions p { font-size:12px; margin:5px 0 14px; }
+.checkpoint-poster footer { width:100%; border-top:1px dashed #152d4460; padding-top:12px; }
+.checkpoint-poster footer span { display:block; font-size:9px; font-weight:800; }
+.checkpoint-poster footer strong { display:block; margin-top:6px; font-size:24px; letter-spacing:.13em; font-weight:900; }
+.poster-edge-pip { position:absolute; bottom:9px; left:17px; font:800 24px Georgia,serif; color:#b9446f; }
+@media (max-height:650px) {
+ .victory-joker { height:30dvh; }
+ .victory-heading h1 { font-size:24px; }
+ .victory-heading p,.victory-team-name { display:none; }
+ .victory-result { padding:6px; }
+}
+@media (max-width:600px) {
+ .screen-summary { grid-template-columns:1fr 1fr auto; gap:10px; padding:7px; }
+ .screen-stat { grid-template-columns:24px 1fr; gap:7px; }
+ .screen-summary .screen-stat b { font-size:20px; }
+ .screen-scattered-art { width:110px; }
+ .screen-mini-card { width:33px; height:47px; padding:4px; font-size:11px; }
+ .screen-mini-card i { font-size:20px; }
+ .card-three { left:40%; top:37px; }.card-three i { font-size:11px; max-width:14px; }
+ .card-heart { right:0; top:3px; }
+ .scatter-pip,.scatter-dash { display:none; }
+ .checkpoint-poster { padding:22px 18px; }
+ .checkpoint-poster header h2 { font-size:22px; }
+ .checkpoint-poster header>span { font-size:9px; margin-bottom:9px; }
+ .poster-instructions b { font-size:12px; }
+ .poster-instructions p { font-size:10px; }
+ .checkpoint-poster footer strong { font-size:20px; }
+}
+@media print {
+ @page { size:A4 portrait; margin:10mm; }
+ .print-only-sheet { margin:0!important; padding:0!important; }
+ .printed-checkpoint { display:block!important; width:190mm!important; height:277mm!important; min-height:0!important; margin:0!important; padding:0!important; border:0!important; background:white!important; break-after:page; page-break-after:always; break-inside:avoid; }
+ .printed-checkpoint:last-of-type { break-after:auto; page-break-after:auto; }
+ .printed-checkpoint .checkpoint-poster { box-sizing:border-box; width:190mm; height:277mm; max-width:none; aspect-ratio:auto; margin:0; padding:14mm 13mm; border:1.2mm solid #152d44; box-shadow:none; }
+ .printed-checkpoint .poster-qr { width:112mm; height:112mm; padding:5mm; border:.5mm solid #152d44; margin:7mm 0; }
+ .printed-checkpoint .poster-qr img { width:100%; height:100%; }
+ .printed-checkpoint .checkpoint-poster header>span { font-size:13pt; margin-bottom:6mm; }
+ .printed-checkpoint .checkpoint-poster header>b { font-size:16pt; padding:3mm 6mm; }
+ .printed-checkpoint .checkpoint-poster header h2 { font:400 25pt/1.1 var(--display); margin:6mm 0 3mm; }
+ .printed-checkpoint .checkpoint-poster header p { font-size:13pt; }
+ .printed-checkpoint .poster-instructions b { font-size:19pt; }
+ .printed-checkpoint .poster-instructions p { font-size:12pt; margin:3mm 0 5mm; }
+ .printed-checkpoint .checkpoint-poster footer span { font-size:10pt; }
+ .printed-checkpoint .checkpoint-poster footer strong { font-size:27pt; letter-spacing:2mm; }
+ .victory-reworked> :not(.victory-certificate) { display:none!important; }
+ .victory-reworked .victory-certificate { display:block!important; max-width:170mm; width:100%; margin:10mm auto!important; }
+ .victory-reworked { display:block; height:auto; }
+}
+@media (prefers-reduced-motion:reduce) { .victory-joker-inner,.collection-tile { transition:none; } }
+.checkpoint-poster { padding:clamp(22px,3vw,36px); }
+@media print {
+ .admin-shell:has(.print-only-sheet)>:not(.print-only-sheet) { display:none!important; }
+ .admin-shell:has(.print-only-sheet) { background:white!important; }
+ .printed-checkpoint .checkpoint-poster { padding:14mm 13mm; }
+ .hunt-app .hunt-main-game .victory-reworked { height:auto; }
+}
