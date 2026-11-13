@@ -62,6 +62,7 @@ export default function Home(){
  [name,setName]=useState(''),[leader,setLeader]=useState(''),[captainPhone,setCaptainPhone]=useState(''),[memberName,setMemberName]=useState(''),[size,setSize]=useState(3),
  [accessInput,setAccessInput]=useState(''),[newCode,setNewCode]=useState(''),
  [working,setWorking]=useState(false),[notice,setNotice]=useState(''),
+ [huntPanel,setHuntPanel]=useState<'clue'|'checkpoint'>('clue'),
  [scanning,setScanning]=useState(false),[codeInput,setCodeInput]=useState(''),
  [scanned,setScanned]=useState(''),[answer,setAnswer]=useState(''),
  [hint,setHint]=useState(''),[clock,setClock]=useState(Date.now()),
@@ -129,7 +130,8 @@ export default function Home(){
    const st=qs.get('stage');if(st)sessionStorage.setItem('qr-stage',st);
    window.history.replaceState(null,'',window.location.pathname);}
  },[]);
- useEffect(()=>{setHint('');setAnswer('');setCodeInput('');},[game?.stage?.id]);
+ useEffect(()=>{setHint('');setAnswer('');setCodeInput('');setHuntPanel('clue');},[game?.stage?.id]);
+ useEffect(()=>{if(scanned)setHuntPanel('checkpoint');},[scanned]);
  async function register(){
   setFormError('');
   if(name.trim().length<2){
@@ -341,12 +343,19 @@ export default function Home(){
         <button className="btn btn-yellow" disabled={working||game.paused} onClick={()=>void startHunt()}>
          {working?'Preparing the deck…':'Begin the hunt'} <ArrowRight size={19}/></button>
        </div>}
-       {game.stage&&<div className="stage-panel">
+       {game.stage&&<div className={"stage-panel hunt-panel-"+huntPanel}>
         <div className="stage-head"><div className="stage-number">0{game.stage.position}</div>
          <div><span className="eyebrow">YOUR CURRENT MISSION</span><h2>{game.stage.title}</h2></div>
         <div className="stage-suit" aria-hidden>{game.stage.suit+'\uFE0E'}</div></div>
+        <div className="mission-tabs" role="group" aria-label="Current mission panel">
+         <button aria-pressed={huntPanel==='clue'} onClick={()=>setHuntPanel('clue')}><Eye size={15}/> The clue</button>
+         <button aria-pressed={huntPanel==='checkpoint'} onClick={()=>setHuntPanel('checkpoint')}><ScanLine size={15}/>{game.stage.checkpointVerified?'The puzzle':'Checkpoint'}</button>
+        </div>
+        {huntPanel==='clue'&&<div className="mission-clue"><div className="clue-box"><span><Eye size={17}/> {hint?'THE JOKER’S HINT':'THE JOKER’S CLUE'}</span><p>“{hint||game.stage.clue}”</p></div>
+         <div className="mission-clue-actions"><button className="btn btn-outline" onClick={()=>{if(hint)setHint('');else void showHint();}}><Sparkles size={16}/>{hint?'Back to clue':'Need a hint?'}</button><button className="btn btn-blue" onClick={()=>setHuntPanel('checkpoint')}> {game.stage.checkpointVerified?'Open puzzle':'At the checkpoint?'} <ArrowRight size={16}/></button></div>
+        </div>}
         <div className="location-line"><Flag size={19}/><span>{game.stage.locationLabel}</span></div>
-        {!game.stage.checkpointVerified?<div className="checkpoint-area">
+        {huntPanel==='checkpoint'&&(!game.stage.checkpointVerified?<div className="checkpoint-area">
          <div className="checkpoint-title"><ScanLine/><div><h3>FIND THE CHECKPOINT.</h3>
           <p>{game.stage.staffOnly?'This stage needs an organizer to verify your arrival.':"Scan the QR or enter its backup code."}</p></div></div>
          {!game.stage.staffOnly&&<>
@@ -371,7 +380,7 @@ export default function Home(){
           <input value={answer} onChange={e=>setAnswer(e.target.value)} placeholder="Your answer goes here…" aria-label="Your puzzle answer" maxLength={150} required/>
           <button className="btn btn-yellow" disabled={working||game.paused}>Submit answer <ArrowRight size={19}/></button>
          </form>
-        </div>}
+        </div>)}
        </div>}
       </div>
       <button className="text-link logout-link" onClick={()=>void logout()}><LogOut size={15}/> Switch team / leave device</button>

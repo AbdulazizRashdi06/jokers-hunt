@@ -853,3 +853,98 @@ button.team-admin-card { text-align: left; }
 }
 
 .hunt-app .hunt-main-game .final-reveal-wrap { height:clamp(130px,29dvh,220px); transform:scale(.65); }
+/* Readable cards and a dedicated clue/checkpoint mission card. */
+.hunt-app .hunt-main-game .collection-panel { display:block; padding:9px 12px; }
+.hunt-app .hunt-main-game .collection-header { display:flex; flex-direction:row; }
+.hunt-app .hunt-main-game .progress-track { margin:5px 0 8px; }
+.hunt-app .hunt-main-game .cards-row { padding:2px 0 5px; gap:8px; }
+.hunt-app .hunt-main-game .card-slot { width:min(86px,8dvh,calc((100vw - 96px) / 5)); }
+.hunt-app .hunt-main-game .card-slot>span { display:block; font-size:9px; margin-top:5px; }
+.hunt-app .hunt-main-game .card-suit { font-size:clamp(26px,4dvh,48px); }
+.hunt-app .hunt-main-game .corner-small, .hunt-app .hunt-main-game .card-rank { font-size:clamp(10px,1.8dvh,16px); }
+.hunt-app .hunt-main-game .back-emblem { font-size:clamp(22px,4dvh,40px); }
+.hunt-app .hunt-main-game .collection-header h2 { display:block; font-size:14px; margin:0; }
+.hunt-app .hunt-main-game .mission-tabs { display:flex; flex:none; border-bottom:1px solid #131d2a20; background:var(--card); padding:3px 8px; gap:8px; }
+.mission-tabs button { display:flex; align-items:center; justify-content:center; gap:6px; flex:1; min-height:36px; color:var(--muted); font-size:13px; font-weight:800; border-radius:4px; }
+.mission-tabs button[aria-pressed='true'] { background:var(--deep); color:var(--cream); }
+.mission-clue { flex:1; min-height:0; display:flex; flex-direction:column; padding:12px; gap:9px; }
+.hunt-app .hunt-main-game .mission-clue .clue-box { margin:0; padding:12px; flex:1; min-height:0; overflow:auto; border:1px solid #146fa945; border-left:4px solid var(--blue); border-radius:4px; background:#146fa909; }
+.mission-clue .clue-box>span { font-size:10px; letter-spacing:.05em; }
+.hunt-app .hunt-main-game .mission-clue .clue-box p { font:600 clamp(15px,2.5dvh,23px)/1.5 var(--body); margin:8px 0 0; }
+.mission-clue-actions { display:flex; gap:8px; justify-content:space-between; }
+.mission-clue-actions .btn { min-height:40px; font-size:12px; padding:7px; gap:5px; }
+.mission-hint { margin:0; font-size:13px; line-height:1.4; background:#ffd52f35; border-radius:4px; padding:8px; max-height:70px; overflow:auto; }
+.hunt-app .hunt-main-game .hunt-panel-clue .location-line { display:none; }
+@media (max-height:700px) {
+ .hunt-app .hunt-main-game .card-slot { width:40px; }
+ .hunt-app .hunt-main-game .card-slot>span { display:none; }
+ .hunt-app .hunt-main-game .collection-header h2 { display:none; }
+ .hunt-app .hunt-main-game .collection-panel { padding:6px 10px; }
+ .hunt-app .hunt-main-game .progress-track { margin:3px 0; }
+ .hunt-app .hunt-main-game .mission-clue { padding:8px; gap:6px; }
+ .hunt-app .hunt-main-game .mission-clue .clue-box { padding:8px; }
+ .hunt-app .hunt-main-game .mission-clue .clue-box p { font-size:15px; line-height:1.35; margin-top:4px; }
+ .mission-clue-actions .btn { min-height:36px; font-size:11px; }
+}
+/* Ten clear positions, with aligned headers and a distinct finish column. */
+.live-screen { padding:clamp(12px,2vw,32px); gap:clamp(8px,1.4dvh,16px); }
+.screen-header { flex:none; min-height:40px; }
+.screen-brand .hunt-mark { width:38px; height:38px; }
+.screen-title h1 { font-size:clamp(23px,4.3dvh,46px); }
+.screen-title-art { position:relative; width:310px; height:clamp(90px,13dvh,140px); flex:none; }
+.screen-title-art .screen-prize { position:absolute; right:0; top:-8px; width:clamp(100px,14dvh,150px); }
+.screen-court { position:absolute; bottom:0; width:64px; height:93px; opacity:.8; filter:drop-shadow(3px 3px 0 #0004); }
+.screen-court svg { height:100%; width:100%; }
+.screen-court.queen { left:14px; rotate:-20deg; }
+.screen-court.king { left:85px; rotate:18deg; }
+.screen-court.joker { left:49px; bottom:4px; }
+.screen-spark { position:absolute; left:0; top:0; font-size:24px; color:var(--yellow); }
+.screen-summary { display:flex; gap:clamp(16px,4vw,70px); align-items:center; padding:9px 16px; background:#ffffff06; border:1px solid #ffffff16; border-radius:6px; color:#9fb5cd; font-size:11px; font-weight:800; letter-spacing:.08em; }
+.screen-summary b { font-size:clamp(17px,2.5dvh,27px); margin-right:8px; color:var(--cream); font-variant-numeric:tabular-nums; }
+.screen-top-label { margin-left:auto; color:var(--yellow); }
+.screen-top-label i { font-style:normal; letter-spacing:7px; color:var(--pink); margin-left:25px; }
+.screen-standings { width:100%; max-width:1740px; align-self:center; }
+.screen-table-heading,.screen-row { grid-template-columns:60px minmax(0,1fr) minmax(160px,230px) 170px; gap:clamp(20px,3vw,48px); padding-left:16px; padding-right:16px; }
+.screen-table-heading { height:27px; padding-bottom:8px; align-items:center; }
+.screen-table-heading>span:nth-child(3) { text-align:center; }
+.screen-table-heading>span:last-child { text-align:right; padding-left:20px; }
+.screen-rows { display:grid; grid-template-rows:repeat(10,minmax(0,1fr)); height:calc(100% - 27px); gap:5px; }
+.screen-row { max-height:none; padding-block:3px; border-radius:5px; }
+.screen-row strong { font-size:clamp(14px,2.5dvh,28px); gap:10px; }
+.screen-rank { font-size:clamp(15px,2.6dvh,28px); text-align:center; }
+.screen-progress { display:grid; grid-template-columns:1fr 52px; gap:12px; font-size:clamp(13px,1.8dvh,20px); }
+.screen-progress>span { text-align:right; }
+.screen-time { border-left:1px solid #ffffff18; padding-left:20px; text-align:right; font-size:clamp(13px,2dvh,22px); }
+.screen-waiting { background:#ffffff02; border-style:dashed; color:#91a7c16b; font-size:clamp(12px,1.8dvh,19px); }
+.screen-waiting .screen-rank,.screen-waiting .screen-time { color:#91a7c166; }
+.screen-row:nth-child(2):not(.screen-waiting) .screen-rank { color:#c6dce9; }
+.screen-row:nth-child(3):not(.screen-waiting) .screen-rank { color:#dbaeb0; }
+@media (max-width:900px) {
+ .screen-table-heading,.screen-row { grid-template-columns:38px minmax(0,1fr) 110px 95px; gap:20px; }
+ .screen-title-art { width:220px; }
+ .screen-court { width:49px; height:71px; }
+ .screen-court.queen { left:0; } .screen-court.king { left:58px; } .screen-court.joker { left:28px; }
+ .screen-progress { grid-template-columns:1fr 40px; gap:6px; }
+ .screen-time { padding-left:12px; }
+}
+@media (max-width:600px) {
+ .screen-title-art { width:95px; }
+ .screen-court,.screen-spark { display:none; }
+ .screen-table-heading,.screen-row { grid-template-columns:25px minmax(0,1fr) 52px 66px; gap:10px; padding-inline:5px; }
+ .screen-summary { gap:10px; padding:6px; font-size:8px; letter-spacing:0; }
+ .screen-summary b { margin-right:3px; }
+ .screen-top-label i { display:none; }
+ .screen-progress { display:block; text-align:center; }
+ .screen-progress>span { text-align:center; }
+ .screen-track { display:none; }
+ .screen-time { padding-left:6px; font-size:11px; }
+ .screen-row strong { font-size:13px; }
+ .screen-row strong svg { display:none; }
+ .screen-table-heading { font-size:8px; }
+ .screen-footer { font-size:9px; }
+}
+.rank-table :is(th,td):nth-child(3) { text-align:center; padding-inline:10px; }
+.rank-table :is(th,td):last-child { text-align:right; padding-right:12px; }
+
+.hunt-app .hunt-main-game .collection-header { justify-content:space-between; gap:10px; }
+.hunt-app .hunt-main-game .collection-header h2 { font-size:13px; }

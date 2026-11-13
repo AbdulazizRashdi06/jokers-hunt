@@ -329,9 +329,9 @@ The hosted design preview stores demo data only in the current browser.
 ## Organizer live display
 Sign in at `/admin` and choose **Live display** to open `/admin/screen` in a
 separate tab. Use **Fullscreen** for the venue screen. Standings refresh every
-five seconds and rotate through pages every twelve seconds. The display shows
+five seconds and show ten positions at once, rotating pages every twelve seconds. The display shows
 team names, collected cards and finish times only. Both the server-rendered page
 and `/api/admin/leaderboard` require the organizer session. An expired or revoked
 session hides the display on its next refresh. Public leaderboard and My Hunt
 use compact layouts; the public standings paginate on smaller screens. The player
-clue and hint panels have been removed.
+clue and hint are available in the mission card, alongside a checkpoint/puzzle tab.
