@@ -7,7 +7,7 @@ const schema=z.object({
  teamName:z.string().trim().min(2).max(45),
  leaderName:z.string().trim().min(2).max(70).transform(s=>s.replace(/\s+/g,' ')),
  captainPhone:captainPhoneSchema,
- size:z.number().int().min(2).max(10)
+ size:z.number().int().min(2).max(4)
 });
 export const POST=action(async(r:NextRequest)=>{
  await limit(r,'team-register',8,3600);

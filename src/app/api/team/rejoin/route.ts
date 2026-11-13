@@ -7,10 +7,12 @@ export const POST=action(async(r:NextRequest)=>{
  const v=schema.parse(await readJson(r));
  await limit(r,'team-rejoin-total',20,900);
  await limit(r,'team-rejoin',8,900,normalizeName(v.teamName));
- const {data:t,error}=await db.from('teams').select('id,name,access_hash')
+ const {data:t,error}=await db.from('teams').select('id,name,access_hash,size')
  .eq('name_key',normalizeName(v.teamName)).maybeSingle();
  assertDb(error);
  if(!t || !sameHash(t.access_hash,hashAccess(v.accessCode))) throw new ApiError(401,'Team name or access code is incorrect.');
+ // Cap older teams before the locked join RPC, without removing existing members.
+ if(t.size>4){const {error:capError}=await db.from('teams').update({size:4}).eq('id',t.id).gt('size',4);assertDb(capError);}
  const {data:joined,error:joinError}=await db.rpc('join_team_member',{p_team:t.id,p_access_hash:hashAccess(v.accessCode),p_name:v.memberName});
  assertDb(joinError);
  if(joined==='full') throw new ApiError(409,'This team is full. If you already joined, use the same name or username.');

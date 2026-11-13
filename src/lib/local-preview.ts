@@ -72,7 +72,7 @@ async function run(r:NextRequest):Promise<NextResponse>{
    }else if(r.method==='DELETE')response=clear('joker_admin');else{isAdmin();response=json({ok:true});}
   }else if(route==='team/logout')response=clear('joker_team');
   else if(route==='team/register'){
-   const name=text('teamName',2,45),leaderName=text('leaderName',2,70).replace(/\s+/g,' '),size=z.number().int().min(2).max(10).parse(body.size);
+   const name=text('teamName',2,45),leaderName=text('leaderName',2,70).replace(/\s+/g,' '),size=z.number().int().min(2).max(4).parse(body.size);
    if(s.teams.some(t=>t.name.toLowerCase()===name.toLowerCase()))fail(409,'That team name is taken.');
    const code=access(),t:Team={id:randomUUID(),name,leaderName,size,captainPhone:captainPhoneSchema.parse(body.captainPhone),memberNames:[leaderName],accessHash:accessHash(code),startedAt:null,finishedAt:null,progress:[],startedPauseSeconds:0,finishedPauseSeconds:0};s.teams.push(t);
    const cookie=loginCookie('joker_team',{teamId:t.id});response=json({ok:true,teamName:name,accessCode:code});response.headers.set('set-cookie',cookie.headers.get('set-cookie')!);
@@ -80,7 +80,7 @@ async function run(r:NextRequest):Promise<NextResponse>{
    const name=text('teamName',2,45),code=text('accessCode',1,40),t=s.teams.find(t=>t.name.toLowerCase()===name.toLowerCase()&&t.accessHash===accessHash(code));
    if(!t)fail(401,'Team name or code is incorrect.');
    const member=text('memberName',2,70).replace(/\s+/g,' ');
-   if(!t!.memberNames!.some(n=>n.toLowerCase()===member.toLowerCase())){if(t!.memberNames!.length>=t!.size)fail(409,'This team is full. Use your existing name to rejoin.');t!.memberNames!.push(member);}
+   if(!t!.memberNames!.some(n=>n.toLowerCase()===member.toLowerCase())){if(t!.memberNames!.length>=Math.min(t!.size,4))fail(409,'This team is full. Use your existing name to rejoin.');t!.memberNames!.push(member);}
    response=loginCookie('joker_team',{teamId:t!.id});
   }else if(route==='state'){
    const t=teamAuth(),stage=current(t),p=stage?progress(t,stage.id):null;

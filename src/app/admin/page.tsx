@@ -17,7 +17,7 @@ type Stage={
  qrToken:string;backupCode:string;staffOnly:boolean;enabled:boolean
 };
 type Team={
- id:string;name:string;leaderName:string;captainPhone:string|null;memberNames:string[];size:number;startedAt:string;finishedAt:string|null;
+ id:string;name:string;leaderName:string;captainPhone:string|null;memberNames:string[];size:number;startedAt:string|null;finishedAt:string|null;
  completed:number;checkpointVerified:string[];currentStageId:string|null
 };
 const blank:Omit<Stage,'id'|'qrToken'|'backupCode'>={
@@ -114,8 +114,8 @@ export default function AdminPage(){
   try{
    if(action==='unblock'&&!confirm('Bypass the puzzle for this team? This action is logged and should only be used for recovery.'))return;
    await post('/api/admin/teams',{action,teamId:selectedTeam,stageId:selectedStage,reason});
-   await refresh();setNotice(action==='staffVerify'?'Checkpoint verified by staff.':
-    action==='unblock'?'Team manually unblocked.':'Game status updated.');
+   await refresh();setNotice(action==='staffVerify'?'Checkpoint verified. Player devices update within 10 seconds.':
+    action==='unblock'?'Stage skipped. Player devices update within 10 seconds.':'Game status updated.');
   }catch(e){setNotice((e as Error).message);}
   finally{setBusy(false);}
  }
@@ -221,11 +221,13 @@ export default function AdminPage(){
       <label>STAGE <select value={selectedStage} onChange={e=>setSelectedStage(e.target.value)}>
        <option value="">No current stage</option>{stages.filter(s=>s.id===teams.find(t=>t.id===selectedTeam)?.currentStageId).map(s=><option key={s.id} value={s.id}>{s.position}: {s.title}</option>)}
       </select></label>
-      <label className="wide-field">REASON FOR INTERVENTION <input value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g. Printed checkpoint was missing"/></label>
+      <label className="wide-field">REASON FOR INTERVENTION <input value={reason} onChange={e=>setReason(e.target.value)} maxLength={400} placeholder="At least 8 characters, e.g. checkpoint QR missing"/></label>
      </div>
+     <div className="staff-reason-choices"><span>Quick reason:</span><button type="button" onClick={()=>setReason('Checkpoint QR code missing or damaged')}>QR missing / damaged</button><button type="button" onClick={()=>setReason('Puzzle could not be completed due to a technical issue')}>Puzzle technical issue</button></div>
+     <p className="staff-readiness" role="status">{!selectedTeam?'Choose a team to assist.':!teams.find(t=>t.id===selectedTeam)?.startedAt?'This team must press Begin the hunt first.':paused?'Resume the hunt before assisting a team.':!selectedStage?'This team has no remaining stage.':reason.trim().length<8?'Choose a quick reason or enter at least 8 characters to enable the actions.':'Ready: verify the checkpoint to unlock its puzzle, or skip the entire stage.'}</p>
      <div className="staff-actions">
-      <button disabled={!selectedTeam||!selectedStage||reason.trim().length<8||busy} className="btn btn-blue" onClick={()=>void teamAction('staffVerify')}><Check size={18}/> Verify checkpoint only</button>
-      <button disabled={!selectedTeam||!selectedStage||reason.trim().length<8||busy} className="btn btn-outline" onClick={()=>void teamAction('unblock')}><ShieldCheck size={18}/> Manual unblock (bypass puzzle)</button>
+      <button disabled={!selectedTeam||!selectedStage||reason.trim().length<8||busy||paused||!teams.find(t=>t.id===selectedTeam)?.startedAt} className="btn btn-blue" onClick={()=>void teamAction('staffVerify')}><Check size={18}/> Verify checkpoint only</button>
+      <button disabled={!selectedTeam||!selectedStage||reason.trim().length<8||busy||paused||!teams.find(t=>t.id===selectedTeam)?.startedAt} className="btn btn-outline" onClick={()=>void teamAction('unblock')}><ShieldCheck size={18}/> Skip stage (checkpoint + puzzle)</button>
      </div>
      <div className="team-recovery-actions"><button className="btn btn-outline" disabled={!selectedTeam||busy||reason.trim().length<8} onClick={()=>void resetAccess()}><Lock size={17}/> Replace lost rejoin code</button>
       <button className="btn danger-button" disabled={!selectedTeam||busy} onClick={()=>setDeleteTeam(teams.find(t=>t.id===selectedTeam)||null)}><Trash2 size={17}/> Delete selected team</button></div>

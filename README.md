@@ -340,3 +340,9 @@ Checkpoint printing produces one full-size A4 poster per copy. The print layout
 hides dashboard controls and keeps decorative cards outside the QR quiet zone.
 The final Joker can be flipped by tapping it; the result shows the recorded
 leaderboard time and current placing (which can change as other teams finish).
+
+Organizer checkpoint verification and stage skipping use the same guarded database
+functions as player progression. A quick reason can be selected in Teams & recovery;
+the team must have started and the hunt must be running. Player devices poll every
+ten seconds, or can use the refresh button. New teams have 2–4 players. Older teams
+keep existing members, but cannot add a fifth member through the join flow.

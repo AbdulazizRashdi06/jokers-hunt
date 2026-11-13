@@ -124,6 +124,7 @@ export default function Home(){
  },[]);
  useEffect(()=>{setAnswer('');setCodeInput('');setHuntPanel('clue');},[game?.stage?.id]);
  useEffect(()=>{if(scanned)setHuntPanel('checkpoint');},[scanned]);
+ useEffect(()=>{if(game?.stage?.checkpointVerified)setHuntPanel('checkpoint');},[game?.stage?.checkpointVerified,game?.stage?.id]);
  async function register(){
   setFormError('');
   if(name.trim().length<2){
@@ -263,11 +264,11 @@ export default function Home(){
         <label>CAPTAIN&apos;S NAME OR USERNAME<input value={leader} onChange={event => { setLeader(event.target.value); setFormError(''); }} placeholder="Your name" maxLength={70} autoComplete="name"/></label>
         <label>CAPTAIN&apos;S PHONE NUMBER<input type="tel" inputMode="tel" autoComplete="tel" value={captainPhone} onChange={event=>{setCaptainPhone(event.target.value);setFormError('');}} placeholder="Include your country code" maxLength={30}/><small>Organizers only — used for hunt support and prize collection.</small></label>
         <div className="join-player-row">
-         <span id="join-player-label">NUMBER OF PLAYERS</span>
+         <span id="join-player-label">PLAYERS · MAX 4</span>
          <div className="join-stepper" role="group" aria-labelledby="join-player-label">
           <button type="button" aria-label="Remove one player" disabled={size<=2} onClick={() => setSize(size-1)}><Minus size={18} aria-hidden/></button>
           <output aria-live="polite" aria-label="Players">{size}</output>
-          <button type="button" aria-label="Add one player" disabled={size>=10} onClick={() => setSize(size+1)}><Plus size={18} aria-hidden/></button>
+          <button type="button" aria-label="Add one player" disabled={size>=4} onClick={() => setSize(size+1)}><Plus size={18} aria-hidden/></button>
          </div>
         </div>
        </> : <><label>YOUR NAME OR USERNAME<input value={memberName} onChange={event=>{setMemberName(event.target.value);setFormError('');}} placeholder="Use the same name each time" maxLength={70} autoComplete="nickname"/></label><label>TEAM CODE<input className="join-rejoin-code" value={accessInput} onChange={event => { setAccessInput(event.target.value.toUpperCase()); setFormError(''); }}
@@ -301,7 +302,7 @@ export default function Home(){
       <div><span className="eyebrow">WELCOME TO THE GAME,</span>
        <h1>{game.team.name}<span> ✦</span></h1>
        </div>
-      <div className="game-timer"><Clock3 size={18}/><div><small>YOUR HUNT TIME</small><strong>{elapsed}</strong></div></div>
+      <button className="hunt-refresh" onClick={()=>void refresh()} aria-label="Refresh hunt after organizer assistance"><RefreshCw size={18}/></button><div className="game-timer"><Clock3 size={18}/><div><small>YOUR HUNT TIME</small><strong>{elapsed}</strong></div></div>
      </div>
      {game.paused&&<div className="paused-banner"><LockKeyhole/> Hunt paused by organizers.</div>}
      <div className="dashboard-grid">

@@ -1072,3 +1072,8 @@ button.team-admin-card { text-align: left; }
  .printed-checkpoint .checkpoint-poster { padding:14mm 13mm; }
  .hunt-app .hunt-main-game .victory-reworked { height:auto; }
 }
+
+.staff-reason-choices { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0; font-size:12px; }
+.staff-reason-choices button { min-height:36px; padding:7px 10px; border:1px solid var(--blue); border-radius:5px; font-weight:700; background:var(--card); color:var(--deep); }
+.staff-readiness { font-size:13px; line-height:1.5; padding:10px; background:#fff7e4; border:1px solid #d8c49d; border-radius:4px; }
+.hunt-refresh { display:grid; place-items:center; min-width:36px; min-height:36px; margin-left:auto; border:1px solid #17344b40; border-radius:4px; color:var(--blue); }

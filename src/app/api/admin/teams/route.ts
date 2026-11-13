@@ -56,31 +56,17 @@ export const POST=action(async(r:NextRequest)=>{
  }
  if(!v.teamId||!v.stageId||(v.reason||'').length<8)
   throw new ApiError(400,'Choose a team, current stage, and a reason of at least 8 characters.');
- const {stage,ss}=await currentStage(v.teamId);
- if(!stage||stage.id!==v.stageId) throw new ApiError(409,'That is not the current stage for this team.');
- const {data:settings,error:se}=await db.from('game_settings').select('paused,paused_total_seconds').eq('id',1).single();
- assertDb(se);
- if(settings?.paused&&v.action==='unblock') throw new ApiError(423,'Resume the game before manually completing a stage.');
- const {data:target,error:te}=await db.from('teams').select('started_at').eq('id',v.teamId).maybeSingle();
- assertDb(te);
- if(!target?.started_at) throw new ApiError(409,'This team has not started its hunt yet.');
- const now=new Date().toISOString();
- const {error:e}=await db.from('stage_progress').upsert({
-  team_id:v.teamId,stage_id:v.stageId,checkpoint_verified_at:now,verification_method:'staff'
- },{onConflict:'team_id,stage_id',ignoreDuplicates:true});assertDb(e);
- const {error:ee}=await db.from('stage_progress').update({
-  checkpoint_verified_at:now,verification_method:'staff'
- }).eq('team_id',v.teamId).eq('stage_id',v.stageId).is('checkpoint_verified_at',null);
- assertDb(ee);
+ const {stage}=await currentStage(v.teamId);
+ if(!stage||stage.id!==v.stageId) throw new ApiError(409,'That is not the current stage for this team. Refresh and choose the team again.');
+ const {data:settings,error:se}=await db.from('game_settings').select('paused').eq('id',1).single();assertDb(se);
+ if(settings?.paused) throw new ApiError(423,'Resume the hunt before verifying or skipping a checkpoint.');
+ const {data:target,error:te}=await db.from('teams').select('started_at').eq('id',v.teamId).maybeSingle();assertDb(te);
+ if(!target?.started_at) throw new ApiError(409,'This team must begin its hunt before a checkpoint can be verified or skipped.');
+ const {data:verified,error:ve}=await db.rpc('verify_checkpoint_if_current',{p_team:v.teamId,p_stage:v.stageId,p_method:'staff'});assertDb(ve);
+ if(!verified) throw new ApiError(409,'The checkpoint changed or the hunt paused. Refresh the team and try again.');
  if(v.action==='unblock'){
-  const {error:done}=await db.from('stage_progress').update({completed_at:now})
-  .eq('team_id',v.teamId).eq('stage_id',v.stageId);
-  assertDb(done);
-  if(ss.filter(s=>s.enabled).length===1 ||
-     (await currentStage(v.teamId)).stage===null){
-   const {error:fin}=await db.from('teams').update({finished_at:now,finished_pause_seconds:settings?.paused_total_seconds||0}).eq('id',v.teamId);
-   assertDb(fin);
-  }
+  const {data:completed,error:ce}=await db.rpc('complete_stage_if_current',{p_team:v.teamId,p_stage:v.stageId});assertDb(ce);
+  if(!completed) throw new ApiError(409,'The stage could not be skipped because its state changed. Refresh and try again.');
  }
  await audit(admin,v.action,{team_id:v.teamId,stage_id:v.stageId,reason:v.reason});
  return json({ok:true});
