@@ -1077,3 +1077,38 @@ button.team-admin-card { text-align: left; }
 .staff-reason-choices button { min-height:36px; padding:7px 10px; border:1px solid var(--blue); border-radius:5px; font-weight:700; background:var(--card); color:var(--deep); }
 .staff-readiness { font-size:13px; line-height:1.5; padding:10px; background:#fff7e4; border:1px solid #d8c49d; border-radius:4px; }
 .hunt-refresh { display:grid; place-items:center; min-width:36px; min-height:36px; margin-left:auto; border:1px solid #17344b40; border-radius:4px; color:var(--blue); }
+
+/* A balanced, drawn-card composition: court cards anchor two scattered pips. */
+.venue-card-composition { position:relative; width:clamp(265px,38vw,590px); height:clamp(105px,15dvh,164px); flex:none; margin-right:12px; }
+.venue-card { position:absolute; width:clamp(56px,8dvh,89px); aspect-ratio:150/218; filter:drop-shadow(2px 4px 0 #0003); }
+.venue-card svg { display:block; width:100%; height:100%; }
+.venue-queen { left:2%; top:10%; rotate:-17deg; }
+.venue-ace { left:24%; top:-1%; rotate:10deg; }
+.venue-joker { left:46%; top:17%; rotate:-5deg; z-index:1; }
+.venue-three { left:68%; top:0; rotate:16deg; }
+.venue-king { right:-1%; top:17%; rotate:-10deg; }
+.venue-star { position:absolute; color:#e8c567; font-size:22px; }
+.star-left { left:18%; bottom:2%; }.star-right { right:20%; top:-3%; color:#d598ad; font-size:18px; }
+.screen-row .screen-rank { display:inline-grid; place-items:center; justify-self:center; width:clamp(25px,3.8dvh,40px); height:clamp(23px,3.5dvh,36px); border-radius:5px; font:800 clamp(13px,2dvh,22px)/1 var(--body); border:1px solid transparent; }
+.screen-podium-1 .screen-rank { background:#ffd52f; color:#172c40; border-color:#142535; box-shadow:2px 2px 0 #0004; rotate:-5deg; }
+.screen-podium-2 .screen-rank { background:#dce8ee; color:#172c40!important; border-color:#b9d0db; }
+.screen-podium-3 .screen-rank { background:#eacbd1; color:#66384b!important; border-color:#d5acb7; }
+.screen-row strong svg { width:18px; height:18px; }
+.collection-tile { aspect-ratio:150/218; filter:drop-shadow(1px 3px 0 #17344b25); }
+.collection-tile .playing-card-artwork { border-radius:5px; }
+.hunt-app .hunt-main-game .card-slot { display:flex; flex-direction:column; align-items:center; }
+.hunt-app .hunt-main-game .card-slot>span { width:100%; margin-top:6px; font:800 8px/1.2 var(--body); letter-spacing:.04em; }
+.tile-active { transform:translateY(-3px); filter:drop-shadow(0 3px 0 #b9446f); }
+@media (max-width:900px) {
+ .venue-card-composition { width:275px; margin-right:4px; }
+ .venue-card { width:52px; }
+ .venue-joker { top:20%; }
+}
+@media (max-width:600px) {
+ .venue-card-composition { width:105px; height:100px; margin:0; }
+ .venue-card { width:37px; }
+ .venue-queen { left:0; top:8px; rotate:-16deg; }
+ .venue-three { left:57px; top:30px; rotate:13deg; }
+ .venue-ace,.venue-joker,.venue-king,.venue-star { display:none; }
+ .screen-row .screen-rank { width:22px; height:23px; font-size:12px; }
+}

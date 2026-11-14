@@ -346,3 +346,10 @@ functions as player progression. A quick reason can be selected in Teams & recov
 the team must have started and the hunt must be running. Player devices poll every
 ten seconds, or can use the refresh button. New teams have 2–4 players. Older teams
 keep existing members, but cannot add a fifth member through the join flow.
+
+### Card artwork
+The original SVG pip faces follow standard French-suited card conventions:
+A for Ace, opposite inverted corner indices, and matching, symmetric pip layouts.
+Visual references: https://www.wopc.co.uk/france/classification-of-numeral-card-designs-in-french-suited-packs
+and https://en.wikipedia.org/wiki/Standard_52-card_deck. The SVG-cards reference
+deck was inspected during design; its artwork is not included in the app.

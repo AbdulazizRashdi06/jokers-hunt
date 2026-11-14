@@ -120,12 +120,39 @@ export function LeaderboardArtwork(){
  </svg>;
 }
 
+type StandardSuit='♠'|'♥'|'♦'|'♣';
+function CardPip({suit}: {suit:StandardSuit}){
+ if(suit==='♦')return <path d="M50 3 83 50 50 97 17 50Z"/>;
+ if(suit==='♥')return <path d="M50 92C41 79 7 58 7 32 7 6 40 1 50 25 60 1 93 6 93 32 93 58 59 79 50 92Z"/>;
+ if(suit==='♣')return <><circle cx="50" cy="25" r="22"/><circle cx="25" cy="57" r="22"/><circle cx="75" cy="57" r="22"/><path d="M46 55h8q0 25 13 38H33q13-13 13-38Z"/></>;
+ return <path d="M50 4C42 18 7 40 7 61 7 86 40 89 48 65q-2 18-15 29h34Q54 83 52 65c8 24 41 21 41-4C93 40 58 18 50 4Z"/>;
+}
+const pipPositions:Record<number,[number,number,boolean][]>= {
+ 1:[[75,109,false]],2:[[75,53,false],[75,165,true]],3:[[75,50,false],[75,109,false],[75,168,true]],
+ 4:[[53,53,false],[97,53,false],[53,165,true],[97,165,true]],
+ 5:[[53,53,false],[97,53,false],[75,109,false],[53,165,true],[97,165,true]],
+ 6:[[53,48,false],[97,48,false],[53,109,false],[97,109,false],[53,170,true],[97,170,true]],
+ 7:[[53,48,false],[97,48,false],[75,78,false],[53,109,false],[97,109,false],[53,170,true],[97,170,true]],
+ 8:[[53,48,false],[97,48,false],[75,78,false],[53,109,false],[97,109,false],[75,140,true],[53,170,true],[97,170,true]],
+ 9:[[53,43,false],[97,43,false],[53,87,false],[97,87,false],[75,109,false],[53,131,true],[97,131,true],[53,175,true],[97,175,true]],
+ 10:[[53,43,false],[97,43,false],[75,65,false],[53,87,false],[97,87,false],[53,131,true],[97,131,true],[75,153,true],[53,175,true],[97,175,true]]
+};
+/** Original vector faces following conventional opposite indices and pip layouts. */
+export function PlayingCardArtwork({rank,suit,back=false}:{rank:number;suit:string;back?:boolean}){
+ const pattern=useId();const standard:StandardSuit=['♠','♥','♦','♣'].includes(suit)?suit as StandardSuit:'♠';
+ const value=Math.max(1,Math.min(10,rank)),label=value===1?'A':String(value),ink=standard==='♥'||standard==='♦'?'#ac3e59':'#173449';
+ return <svg className="playing-card-artwork" viewBox="0 0 150 218" aria-hidden="true" data-rank={label}>
+  <defs><pattern id={pattern} width="12" height="12" patternUnits="userSpaceOnUse"><path d="m6 0 6 6-6 6-6-6Z" fill="none" stroke="#f7e5c2" strokeWidth=".7" opacity=".24"/></pattern></defs>
+  <rect x="2" y="2" width="146" height="214" rx="8" fill="#fffcf4" stroke="#173449" strokeWidth="2.4"/>
+  {back?<><rect x="10" y="10" width="130" height="198" rx="3" fill="#173c53"/><rect x="14" y="14" width="122" height="190" rx="2" fill={'url(#'+pattern+')'} stroke="#e1c58b" strokeWidth="1"/><g fill="none" stroke="#e1c58b"><ellipse cx="75" cy="109" rx="33" ry="48"/><ellipse cx="75" cy="109" rx="27" ry="42"/><path d="m75 76 20 33-20 33-20-33ZM42 27h66M42 191h66" strokeWidth="1.2"/><path d="M75 54v20m0 70v20M29 109h20m52 0h20"/></g></>:<>
+   {[false,true].map(invert=><g key={String(invert)} transform={invert?'rotate(180 75 109)':undefined} fill={ink}>
+    <text x="19" y="31" textAnchor="middle" fontFamily="Georgia,serif" fontSize={value===10?'23':'27'} fontWeight="bold">{label}</text>
+    <g transform="translate(11 36) scale(.16)"><CardPip suit={standard}/></g>
+   </g>)}
+   <g fill={ink}>{pipPositions[value].map(([x,y,inverted],index)=>{const size=value===1?48:value>=9?24:30;return <g key={index} data-pip="true" transform={'translate('+x+' '+y+') rotate('+(inverted?180:0)+') scale('+(size/100)+') translate(-50 -50)'}><CardPip suit={standard}/></g>;})}</g>
+  </>}
+ </svg>;
+}
 export function CollectionCard({rank,suit,complete,active}:{rank:number;suit:string;complete:boolean;active:boolean}){
- const pattern=useId();const ink=complete?'#244f70':active?'#a13d62':'#fff3d5';
- return <div className={'collection-tile '+(complete?'tile-collected':active?'tile-active':'tile-locked')} aria-hidden="true"><svg viewBox="0 0 100 144">
-  <defs><pattern id={pattern} width="12" height="12" patternUnits="userSpaceOnUse"><path d="m6 0 6 6-6 6-6-6Z" fill="none" stroke="#fff3d5" strokeWidth=".6" opacity=".2"/></pattern></defs>
-  <rect x="2" y="2" width="96" height="140" rx="7" fill={complete?'#fffaf0':active?'#f8e9e9':'#18394e'} stroke={active?'#a13d62':'#18394e'} strokeWidth="3"/>
-  <rect x="8" y="8" width="84" height="128" rx="3" fill={complete||active?'none':`url(#${pattern})`} stroke={ink} strokeWidth=".8" opacity=".8"/>
-  {complete||active?<><g fontFamily="Georgia,serif" fontSize="20" fontWeight="bold" fill={ink}><text x="15" y="31">{rank}</text><text x="15" y="46" fontSize="14">{suit}</text></g><g transform="rotate(180 50 72)" fontFamily="Georgia,serif" fontSize="20" fontWeight="bold" fill={ink}><text x="15" y="31">{rank}</text><text x="15" y="46" fontSize="14">{suit}</text></g><text x="50" y="89" textAnchor="middle" fontFamily="Georgia,serif" fontSize="43" fill={ink}>{suit}</text></>:<g stroke={ink} fill="none"><path d="m50 42 22 30-22 30-22-30Z" strokeWidth="1.2"/><path d="m50 50 16 22-16 22-16-22Z" strokeWidth=".7"/><circle cx="50" cy="72" r="7"/><path d="M42 26h16M42 118h16"/></g>}
- </svg></div>;
+ return <div className={'collection-tile '+(complete?'tile-collected':active?'tile-active':'tile-locked')} aria-hidden="true"><PlayingCardArtwork rank={rank} suit={suit} back={!complete&&!active}/></div>;
 }
