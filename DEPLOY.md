@@ -38,4 +38,18 @@ If a run fails, read the failed step before dispatching again. Use `gh run view 
 
 ## Server setup
 
+### HTTPS proxy route
+
+The shared proxy needs this block in `/opt/zarqa/deploy/Caddyfile` and in Zarqa's repository at `deploy/Caddyfile`.
+
+```caddyfile
+# >>> jokers-hunt
+jokers-hunt.173-249-40-122.sslip.io {
+    reverse_proxy jokers-hunt:3000
+}
+# <<< jokers-hunt
+```
+
+On 26 November 2026, the app was healthy while this block was missing from the shared proxy. Restoring and reloading the route resolved the TLS handshake failure. Keep the block when deploying Zarqa's shared Caddyfile. Check the active proxy configuration as well as the host file when diagnosing this error.
+
 The owner-installed command at `/opt/jokers-hunt/bin/zarqa-release.sh` comes from [deploy/zarqa-release.sh](deploy/zarqa-release.sh). If that script needs an update, the VPS owner installs the reviewed copy with their regular SSH access. The Actions key runs the installed command with the Git commit SHA and app source archive. It uses the existing Dockerfile and Compose project in `/opt/jokers-hunt`.
